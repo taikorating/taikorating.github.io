@@ -15,12 +15,12 @@
             background-image: radial-gradient(#ffccbc 10%, transparent 10%);
             background-size: 20px 20px;
             color: #333;
-            /* スクロール許可 */
+            /* 画面全体のスクロールを許可 */
             overflow-y: auto;
             min-height: 100vh;
         }
 
-        /* --- メインコンテナ（表示モードで変化） --- */
+        /* --- メインコンテナ --- */
         .game-container {
             background: #fff;
             padding: 20px;
@@ -30,9 +30,11 @@
             flex-direction: column;
             transition: all 0.3s ease;
             margin: 0 auto;
+            /* コンテンツが多い時にコンテナ自体も伸びるように */
+            height: auto; 
         }
 
-        /* PCモード（カード型）のデザイン */
+        /* PCモード（カード型） */
         .game-container.pc-mode {
             width: 100%;
             max-width: 500px;
@@ -44,10 +46,10 @@
             border: 4px solid #ff5722;
         }
 
-        /* スマホモード（全画面）のデザイン */
+        /* スマホモード（全画面） */
         .game-container.mobile-mode {
             width: 100%;
-            min-height: 100vh; /* 画面いっぱい */
+            min-height: 100vh;
             border: none;
             border-radius: 0;
             box-shadow: none;
@@ -66,7 +68,6 @@
         .btn-green { background: #4caf50; }
         .btn-gray { background: #757575; }
         
-        /* 表示切り替えボタン */
         .view-toggle-box {
             margin-top: 30px;
             padding-top: 20px;
@@ -106,8 +107,8 @@
         .screen.active { display: flex; }
         .center-content { justify-content: center; }
 
-        /* スクロールが必要な要素用 */
-        .scrollable-content { width: 100%; overflow-y: auto; max-height: 60vh; }
+        /* スクロールエリアの確保 */
+        .scrollable-content { width: 100%; overflow-y: auto; flex: 1; margin-bottom: 20px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s; }
@@ -198,7 +199,7 @@
                     2. 3曲の良の合計数を比較<br>
                     3. 結果（勝ち・負け）を申告
                 </div>
-                <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
+                <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left;">
                     <p><strong>相手:</strong> <span id="rep-opp-name" style="font-weight:bold;"></span></p>
                     <p><strong>X ID:</strong> <span id="rep-opp-xid" style="color:#1da1f2; font-weight:bold;"></span></p>
                     <hr style="margin:10px 0; border:none; border-top:1px solid #ddd;">
@@ -206,6 +207,7 @@
                     <div id="rep-song-list" class="song-list-box"></div>
                 </div>
             </div>
+
             <p style="font-weight:bold; margin-bottom:10px;">あなたの勝敗は？</p>
             <div style="display:flex; gap:10px; width:100%; margin-bottom:20px;">
                 <button class="btn" style="background:#e91e63;" onclick="confirmResult('WIN')">勝ち</button>
@@ -336,14 +338,9 @@
             }
         };
 
-        // 初期ロード時に設定を読み込む
         const savedMode = localStorage.getItem('view_mode');
-        if (savedMode) {
-            window.setViewMode(savedMode);
-        } else {
-            // デフォルトはスマホ版
-            window.setViewMode('mobile');
-        }
+        if (savedMode) window.setViewMode(savedMode);
+        else window.setViewMode('mobile');
 
         // --- Auth & Game Logic ---
         window.loginAnon = () => signInAnonymously(auth).catch(e => alert(e.message));
@@ -497,7 +494,6 @@
             currentRoomId = roomId;
             isFinalizing = false;
             unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
-                // 相手切断時の処理
                 if(!docSnap.exists()) {
                     localStorage.removeItem('current_room_id');
                     alert("対戦相手が退出したか、部屋が解散されました。\nタイトルへ戻ります。");
@@ -548,7 +544,6 @@
             switchScreen('report-screen');
             document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
             document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
-            
             const listContainer = document.getElementById('rep-song-list');
             listContainer.innerHTML = "";
             currentMatchData.songs.forEach((song, i) => {
@@ -582,7 +577,6 @@
         const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
-
             let valid = false;
             if ((myRes === 'WIN' && oppRes === 'LOSE') ||
                 (myRes === 'LOSE' && oppRes === 'WIN') ||
@@ -591,9 +585,7 @@
             }
 
             if (valid) {
-                localStorage.removeItem('current_room_id');
                 if(unsubscribeRoom) unsubscribeRoom();
-                
                 const currentRate = Number(userData.rate) || 1500;
                 let newRate = currentRate;
                 let diff = 0;
@@ -602,13 +594,9 @@
                 newRate = currentRate + diff;
 
                 try {
-                    await setDoc(doc(db, "users", currentUser.uid), {
-                        rate: newRate
-                    }, { merge: true });
+                    await setDoc(doc(db, "users", currentUser.uid), { rate: newRate }, { merge: true });
                     userData.rate = newRate; 
-                } catch (e) {
-                    console.error("レート保存エラー:", e);
-                }
+                } catch (e) { console.error("レート保存エラー:", e); }
                 showFinalResult(myRes, diff, newRate);
             } else {
                 isFinalizing = false;
@@ -640,7 +628,16 @@
             setTimeout(() => diffEl.classList.add('show'), 500);
         };
 
-        window.returnToTitle = () => {
+        // --- タイトルに戻る時に部屋を削除 ---
+        window.returnToTitle = async () => {
+            // ここで部屋データを削除
+            if (currentRoomId) {
+                try {
+                    await deleteDoc(doc(db, "rooms", currentRoomId));
+                } catch(e) {
+                    console.log("部屋削除スキップ（既に削除済みなど）");
+                }
+            }
             localStorage.removeItem('current_room_id');
             location.reload();
         };
