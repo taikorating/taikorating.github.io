@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>太鼓レーティングマッチ</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;800&display=swap" rel="stylesheet">
     <style>
-        /* --- デザイン（前回と同じ） --- */
+        /* --- デザイン定義 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            font-family: 'M PLUS Rounded 1c', "Hiragino Kaku Gothic ProN", sans-serif;
             background-color: #fce4d6;
             background-image: radial-gradient(#ffccbc 10%, transparent 10%);
             background-size: 20px 20px;
@@ -19,170 +20,244 @@
             color: #333;
             overflow: hidden;
         }
+        
+        /* メインコンテナ */
         .game-container {
             background: #fff;
             width: 100%;
             max-width: 500px;
-            padding: 30px 20px;
+            height: 90vh; /* 画面の高さの90% */
+            max-height: 800px;
+            padding: 20px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             text-align: center;
             border: 4px solid #ff5722;
             position: relative;
-            min-height: 700px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            overflow-y: auto;
+            overflow-y: auto; /* コンテンツが多い場合はスクロール */
         }
 
-        .title-section h1 { font-size: 2.5rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; font-weight: 900; }
-        .title-section p { color: #f57c00; font-weight: bold; margin-bottom: 20px; }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
-        .x-input { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; }
-        .player-info { background: #333; color: #fff; padding: 8px 15px; border-radius: 50px; display: inline-block; margin-bottom: 20px; font-weight: bold; font-size: 0.9rem; }
+        /* 共通パーツ */
+        h1, h2, h3 { font-weight: 800; }
+        .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
+        .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; }
         
-        .match-btn { border: none; padding: 15px; border-radius: 12px; cursor: pointer; transition: 0.1s; width: 100%; margin-bottom: 15px; color: white; font-weight: bold; font-size: 1.1rem; }
-        .match-btn:active { transform: translateY(2px); }
-        .mode-normal { background: linear-gradient(135deg, #42a5f5, #1e88e5); box-shadow: 0 4px 0 #1565c0; }
-        .mode-hard { background: linear-gradient(135deg, #ef5350, #c62828); box-shadow: 0 4px 0 #b71c1c; }
+        button { font-family: inherit; outline: none; }
+        .btn { border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.1s; width: 100%; font-weight: bold; color: white; margin-bottom: 10px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); position: relative; top: 0;}
+        .btn:active { top: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+        .btn-orange { background: #ff5722; }
+        .btn-blue { background: #2196f3; }
+        .btn-green { background: #4caf50; }
+        .btn-gray { background: #757575; }
+        
+        /* ログイン画面用 */
+        .login-btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-google { background: #db4437; }
+        .btn-x { background: #000; }
+        .btn-email { background: #607d8b; }
+        
+        /* プレイヤー情報バー */
+        .profile-bar {
+            background: #333; color: white; padding: 10px 15px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; box-shadow: 0 4px 0 #000;
+        }
+        .profile-name { font-size: 0.9rem; text-align: left; }
+        .profile-rate { color: #ffd700; font-size: 1.1rem; }
+        .settings-icon { cursor: pointer; font-size: 1.2rem; }
 
-        .screen { display: none; width: 100%; animation: fadeIn 0.4s ease; flex-direction: column; align-items: center; justify-content: center; height: 100%; flex:1;}
+        /* メニューボタン群 */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .menu-btn { height: 80px; font-size: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* ランキング */
+        .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        .rank-table th { background: #ffccbc; padding: 8px; color: #d84315; }
+        .rank-table td { border-bottom: 1px solid #eee; padding: 8px; }
+        .rank-1 { color: #d4af37; font-weight: bold; font-size: 1.1rem; } /* 金 */
+        .rank-2 { color: #a0a0a0; font-weight: bold; } /* 銀 */
+        .rank-3 { color: #cd7f32; font-weight: bold; } /* 銅 */
+
+        /* 画面切り替え */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
         .screen.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .center-content { justify-content: center; }
 
-        .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff5722; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        /* モーダル */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s; }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .input-field { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; }
+        .input-label { display: block; text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: #555; }
+
+        /* ローダー */
+        .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff5722; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .opponent-x-display { font-size: 1.2rem; font-weight: bold; color: #1da1f2; margin-bottom: 20px; border: 2px solid #1da1f2; padding: 10px; border-radius: 10px; display: inline-block;}
-        .song-reveal-item { background: #fff3e0; border: 2px solid #ff9800; padding: 15px; margin-bottom: 10px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; opacity: 0; transform: translateX(-20px); transition: all 0.5s ease; width: 100%; text-align: left;}
-        .song-reveal-item.show { opacity: 1; transform: translateX(0); }
-        .song-badge { background: #ff5722; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 8px; }
+        /* 結果画面のアニメーション */
+        .rate-diff { font-size: 1.5rem; opacity: 0; transition: 0.5s; display: block; height: 30px; }
+        .rate-diff.show { opacity: 1; transform: translateY(-5px); }
 
-        .report-buttons { display: flex; gap: 10px; width: 100%; margin-top: 20px; }
-        .report-btn { flex: 1; padding: 15px 0; border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
-        .btn-win { background: #e91e63; }
-        .btn-lose { background: #2196f3; }
-        .btn-draw { background: #9c27b0; }
-
-        .rate-animation-box { margin: 30px 0; font-weight: 900; }
-        .rate-value { font-size: 3rem; display: inline-block; transition: color 0.3s; }
-        .rate-diff { font-size: 1.5rem; margin-left: 10px; opacity: 0; transition: opacity 0.5s, transform 0.5s; display: inline-block; }
-        .rate-diff.show { opacity: 1; transform: translateY(-10px); }
-        
-        .result-title { font-size: 2.5rem; margin-bottom: 10px; font-weight: 900; }
-        .win-color { color: #e91e63; }
-        .lose-color { color: #2196f3; }
-        .draw-color { color: #9c27b0; }
-
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; border-radius: 20px;}
-        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 85%; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
-        .modal-btn { padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .modal-yes { background: #ff5722; color: white; }
-        .modal-no { background: #ccc; }
     </style>
 </head>
 <body>
 
     <div class="game-container">
-        <div id="loading-screen" class="screen active">
-            <div class="loader"></div>
-            <p>データを読み込み中...</p>
+        
+        <div id="login-screen" class="screen active center-content">
+            <h1 class="title-logo">DON-DER MATCH</h1>
+            <p class="sub-title">ログインして対戦を始めよう</p>
+            
+            <div class="login-btn-group" style="width: 100%;">
+                <button class="btn btn-google" onclick="loginWithGoogle()">Googleでログイン</button>
+                <button class="btn btn-x" onclick="alert('XログインにはAPI設定が必要です。\n現在は他の方法をご利用ください。')">X (Twitter) でログイン</button>
+                
+                <div style="display:flex; gap:5px;">
+                    <input type="email" id="email-input" class="input-field" placeholder="メールアドレス" style="margin:0;">
+                    <input type="password" id="pass-input" class="input-field" placeholder="パスワード" style="margin:0;">
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn btn-email" onclick="loginWithEmail()">登録/ログイン</button>
+                </div>
+
+                <button class="btn btn-gray" onclick="loginAnon()">匿名で始める</button>
+            </div>
         </div>
 
         <div id="title-screen" class="screen">
-            <header class="title-section">
-                <h1>DON-DER MATCH</h1>
-                <p>Random Song Rating Battle</p>
-            </header>
-            <div class="player-info">
-                <span class="player-name">ID: ...</span>
-                <span class="player-rate">Rate: <span id="current-rate-display">1500</span></span>
-            </div>
-            <div class="input-group">
-                <label>あなたのX(Twitter) ID</label>
-                <input type="text" id="my-x-id" class="x-input" placeholder="@ユーザー名を入力" value="@donder">
-            </div>
-            <div class="mode-select" style="width:100%">
-                <button class="match-btn mode-normal" onclick="startMatching('normal')">難易度 F ～ A+ で対戦</button>
-                <button class="match-btn mode-hard" onclick="startMatching('hard')">難易度 S ～ SS で対戦</button>
-            </div>
-        </div>
-
-        <div id="matching-screen" class="screen">
-            <div class="loader"></div>
-            <p style="font-weight:bold;">対戦相手を探しています...</p>
-            <p id="match-status" style="color:#ff5722; margin-top:10px;"></p>
-            <button class="match-btn" style="background:#999; margin-top:30px;" onclick="cancelMatching()">キャンセル</button>
-        </div>
-
-        <div id="reveal-screen" class="screen" style="justify-content: flex-start; padding-top: 20px;">
-            <h2 style="color:#ff5722; margin-bottom:10px;">MATCH START!</h2>
-            <p>VS 対戦相手</p>
-            <div class="opponent-x-display" id="opponent-x-display"></div>
-            <div id="song-reveal-container" style="width:100%; margin-top:15px;"></div>
-            <button id="goto-report-btn" class="match-btn" style="background:#4caf50; display:none; margin-top:20px;" onclick="goToReportScreen()">結果を報告する</button>
-        </div>
-
-        <div id="report-screen" class="screen">
-            <h2 style="margin-bottom:20px;">結果報告</h2>
-            <p style="font-size:0.9rem; color:#666; margin-bottom:20px;">対戦お疲れ様でした。<br>勝敗を選択してください。</p>
-            <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
-                <p><strong>相手:</strong> <span id="rep-opp-name"></span></p>
-                <p><strong>課題曲:</strong> <span id="rep-song-1"></span> など</p>
-            </div>
-            <div class="report-buttons">
-                <button class="report-btn btn-win" onclick="confirmResult('WIN')">勝ち</button>
-                <button class="report-btn btn-draw" onclick="confirmResult('DRAW')">引分</button>
-                <button class="report-btn btn-lose" onclick="confirmResult('LOSE')">負け</button>
-            </div>
-        </div>
-
-        <div id="waiting-result-screen" class="screen">
-            <div class="loader"></div>
-            <h2>確認中...</h2>
-            <p>相手の申告を待っています。</p>
-            <p style="font-size:0.8rem; color:#888; margin-top:10px;">相手も結果を入力すると<br>自動で結果画面へ進みます。</p>
-        </div>
-
-        <div id="final-result-screen" class="screen">
-            <h2 id="final-title" class="result-title">WIN!</h2>
-            <p id="final-message">おめでとうございます！</p>
-            <div class="rate-animation-box">
-                <div class="rate-value" id="anim-rate-val">1500</div>
-                <div class="rate-diff" id="anim-rate-diff">+20</div>
-            </div>
-            <button class="match-btn" style="background:#333;" onclick="returnToTitle()">タイトルへ戻る</button>
-        </div>
-
-        <div id="confirm-modal" class="modal-overlay">
-            <div class="modal-box">
-                <h3>確認</h3>
-                <p style="margin:15px 0;">結果は「<span id="modal-selection" style="font-weight:bold; color:#ff5722;"></span>」で<br>間違いないですか？</p>
-                <div class="modal-buttons">
-                    <button class="modal-btn modal-no" onclick="closeModal()">戻る</button>
-                    <button class="modal-btn modal-yes" onclick="submitResult()">決定</button>
+            <h1 class="title-logo">DON-DER MATCH</h1>
+            
+            <div class="profile-bar">
+                <div>
+                    <div class="profile-name" id="display-name">Loading...</div>
+                    <div style="font-size:0.8rem; opacity:0.8;" id="display-xid">@未設定</div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="profile-rate">Rate: <span id="display-rate">---</span></div>
+                    <span class="settings-icon" onclick="openProfileModal()">⚙️設定</span>
                 </div>
             </div>
+
+            <div class="menu-grid">
+                <button class="btn btn-orange menu-btn" onclick="openRanking()">
+                    <span>🏆</span>ランキング
+                </button>
+                <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')">
+                    <span>📜</span>対戦履歴
+                </button>
+            </div>
+
+            <p style="font-weight:bold; margin-bottom:10px;">対戦難易度を選択</p>
+            <button class="btn btn-green" onclick="tryStartMatching('normal')">難易度 F ～ A+</button>
+            <button class="btn btn-orange" onclick="tryStartMatching('hard')">難易度 S ～ SS</button>
         </div>
 
-        <div id="error-modal" class="modal-overlay">
-            <div class="modal-box">
-                <h3 style="color:#d32f2f;">結果不一致</h3>
-                <p style="margin:15px 0;">お互いの申告が食い違っています。<br>もう一度入力してください。</p>
-                <button class="modal-btn modal-yes" onclick="retryReport()">再入力する</button>
+        <div id="matching-screen" class="screen center-content">
+            <div class="loader"></div>
+            <h3>対戦相手を探しています...</h3>
+            <p id="match-status" style="color:#ff5722; margin-top:10px;"></p>
+            <button class="btn btn-gray" style="margin-top:30px; width:50%;" onclick="cancelMatching()">キャンセル</button>
+        </div>
+
+        <div id="reveal-screen" class="screen" style="padding-top:20px;">
+            <h2 style="color:#ff5722;">MATCH START!</h2>
+            <p>VS 対戦相手</p>
+            <div style="font-size:1.5rem; font-weight:bold; color:#1da1f2; border:2px solid #1da1f2; padding:10px; border-radius:10px; margin:10px 0;">
+                <span id="opponent-x-display"></span>
             </div>
+            <div id="song-reveal-container" style="width:100%; margin-top:10px; flex:1;"></div>
+            <button id="goto-report-btn" class="btn btn-green" style="display:none;" onclick="goToReportScreen()">結果を報告する</button>
+        </div>
+
+        <div id="report-screen" class="screen center-content">
+            <h2>結果報告</h2>
+            <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
+                <p><strong>相手:</strong> <span id="rep-opp-name"></span></p>
+                <p><strong>課題曲:</strong> <span id="rep-song-1"></span> ...</p>
+            </div>
+            <div style="display:flex; gap:10px; width:100%;">
+                <button class="btn" style="background:#e91e63;" onclick="confirmResult('WIN')">勝ち</button>
+                <button class="btn" style="background:#9c27b0;" onclick="confirmResult('DRAW')">引分</button>
+                <button class="btn" style="background:#2196f3;" onclick="confirmResult('LOSE')">負け</button>
+            </div>
+        </div>
+
+        <div id="waiting-result-screen" class="screen center-content">
+            <div class="loader"></div>
+            <h3>確認中...</h3>
+            <p>相手の入力を待っています</p>
+        </div>
+
+        <div id="final-result-screen" class="screen center-content">
+            <h1 id="final-title" style="font-size:3rem; margin-bottom:10px;">WIN!</h1>
+            <div style="margin:20px 0;">
+                <div style="font-size:3rem; font-weight:900;" id="anim-rate-val">1500</div>
+                <div class="rate-diff" id="anim-rate-diff">+20</div>
+            </div>
+            <button class="btn btn-gray" onclick="returnToTitle()">タイトルへ戻る</button>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>プロフィール設定</h3>
+            <div style="margin-top:20px;">
+                <label class="input-label">プレイヤー名 (アプリ内表示)</label>
+                <input type="text" id="edit-name" class="input-field" placeholder="例: どんちゃん">
+                
+                <label class="input-label">X(Twitter) ID</label>
+                <p style="font-size:0.7rem; color:#e91e63; text-align:left;">※対戦には先頭に @ が必要です</p>
+                <input type="text" id="edit-xid" class="input-field" placeholder="例: @taiko_master">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-gray" onclick="closeModal('profile-modal')">キャンセル</button>
+                <button class="btn btn-orange" onclick="saveProfile()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ranking-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:450px;">
+            <h3>レーティングランキング</h3>
+            <p style="font-size:0.8rem; margin-bottom:10px;">Top 10 Players</p>
+            <div style="max-height:300px; overflow-y:auto;">
+                <table class="rank-table">
+                    <thead><tr><th>順位</th><th>名前</th><th>レート</th></tr></thead>
+                    <tbody id="ranking-list"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-gray" style="margin-top:20px;" onclick="closeModal('ranking-modal')">閉じる</button>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>確認</h3>
+            <p style="margin:15px 0;">結果は「<span id="modal-selection" style="font-weight:bold; color:#ff5722;"></span>」で<br>間違いないですか？</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-gray" onclick="closeModal('confirm-modal')">戻る</button>
+                <button class="btn btn-orange" onclick="submitResult()">決定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="error-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color:#d32f2f;">結果不一致</h3>
+            <p>お互いの申告が食い違っています。<br>もう一度入力してください。</p>
+            <button class="btn btn-orange" onclick="retryReport()">再入力</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ★★★ APIキーを書き換えてください ★★★
+        // ★★★ APIキーを貼り付けてください ★★★
         const firebaseConfig = {
   apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
   authDomain: "taikorating.firebaseapp.com",
@@ -198,8 +273,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // 変数
         let currentUser = null;
-        let currentRate = 1500; 
+        let userData = { displayName: "名無し", xId: "未設定", rate: 1500 }; // デフォルト値
         let waitingDocId = null;
         let currentRoomId = null;
         let unsubscribeRoom = null;
@@ -211,40 +287,134 @@
             'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
 
-        // ログイン監視 & セッション復帰
-        signInAnonymously(auth);
+        // --- 認証系 ---
+        window.loginAnon = () => signInAnonymously(auth).catch(e => alert(e.message));
+        window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
+        window.loginWithEmail = async () => {
+            const email = document.getElementById('email-input').value;
+            const pass = document.getElementById('pass-input').value;
+            if(!email || !pass) return alert("メールとパスワードを入力してください");
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch(e) {
+                // ログイン失敗なら作成を試みる（簡易実装）
+                try {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                } catch(e2) {
+                    alert("ログイン/登録エラー: " + e2.message);
+                }
+            }
+        };
+
+        // ログイン監視 & データ同期
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 currentUser = user;
-                document.querySelector('.player-name').innerText = "ID: " + user.uid.substring(0,4);
-                
-                // ★復帰チェック★
-                // localStorageにroomIdが残っているか？
-                const savedRoomId = localStorage.getItem('current_room_id');
-                if (savedRoomId) {
-                    console.log("復帰を試みます: " + savedRoomId);
-                    // 部屋が存在するかチェック
-                    const roomRef = doc(db, "rooms", savedRoomId);
-                    const roomSnap = await getDoc(roomRef);
-                    
-                    if (roomSnap.exists()) {
-                        // 部屋があるので復帰（監視開始）
-                        watchRoom(savedRoomId);
-                    } else {
-                        // 部屋がない（既に終わって消されたなど）
-                        localStorage.removeItem('current_room_id');
-                        window.switchScreen('title-screen');
-                    }
+                // ユーザーデータの取得・作成 (usersコレクション)
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    userData = userSnap.data();
                 } else {
-                    // 通常起動
-                    window.switchScreen('title-screen');
+                    // 新規作成
+                    userData = { displayName: "名無しどん", xId: "未設定", rate: 1500, createdAt: new Date() };
+                    await setDoc(userRef, userData);
+                }
+                updateProfileUI();
+                switchScreen('title-screen'); // タイトルへ移動
+
+                // セッション復帰チェック
+                const savedRoomId = localStorage.getItem('current_room_id');
+                if (savedRoomId && userSnap.exists()) { // データロード完了後に復帰
+                    checkRestore(savedRoomId);
                 }
             }
         });
 
-        window.switchScreen = (id) => {
+        // ユーザー情報をUIに反映
+        const updateProfileUI = () => {
+            document.getElementById('display-name').innerText = userData.displayName;
+            document.getElementById('display-xid').innerText = userData.xId;
+            document.getElementById('display-rate').innerText = userData.rate;
+            
+            // 編集モーダルにもセット
+            document.getElementById('edit-name').value = userData.displayName;
+            document.getElementById('edit-xid').value = userData.xId;
+        };
+
+        // --- プロフィール設定 ---
+        window.openProfileModal = () => document.getElementById('profile-modal').style.display = 'flex';
+        
+        window.saveProfile = async () => {
+            const newName = document.getElementById('edit-name').value;
+            const newXid = document.getElementById('edit-xid').value;
+            
+            if(!newName) return alert("名前を入力してください");
+
+            // Firestore更新
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                displayName: newName,
+                xId: newXid || "未設定"
+            });
+            
+            userData.displayName = newName;
+            userData.xId = newXid || "未設定";
+            updateProfileUI();
+            closeModal('profile-modal');
+        };
+
+        // --- ランキング ---
+        window.openRanking = async () => {
+            document.getElementById('ranking-modal').style.display = 'flex';
+            const tbody = document.getElementById('ranking-list');
+            tbody.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
+
+            const q = query(collection(db, "users"), orderBy("rate", "desc"), limit(10));
+            const snapshot = await getDocs(q);
+            
+            tbody.innerHTML = "";
+            let rank = 1;
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                const tr = document.createElement('tr');
+                let rankClass = "";
+                if(rank===1) rankClass="rank-1";
+                if(rank===2) rankClass="rank-2";
+                if(rank===3) rankClass="rank-3";
+                
+                tr.innerHTML = `
+                    <td class="${rankClass}">${rank}</td>
+                    <td style="text-align:left;">${d.displayName}</td>
+                    <td>${d.rate}</td>
+                `;
+                tbody.appendChild(tr);
+                rank++;
+            });
+        };
+
+        // --- マッチング開始 (バリデーション付き) ---
+        window.tryStartMatching = (mode) => {
+            // 条件チェック
+            if (userData.xId === "未設定" || !userData.xId.startsWith("@")) {
+                alert("【対戦エラー】\nX IDが正しく設定されていません。\n設定ボタンから「@」で始まるIDを設定してください。\n(例: @taiko_master)");
+                openProfileModal();
+                return;
+            }
+            startMatching(mode);
+        };
+
+        // --- 以下、前回までのマッチングロジック (少し修正) ---
+        const switchScreen = (id) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+        };
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+        const checkRestore = async (roomId) => {
+             const roomSnap = await getDoc(doc(db, "rooms", roomId));
+             if(roomSnap.exists()) watchRoom(roomId);
+             else localStorage.removeItem('current_room_id');
         };
 
         const pickRandomSongs = (mode) => {
@@ -252,65 +422,63 @@
             return [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
         };
 
-        window.startMatching = async (mode) => {
-            const xId = document.getElementById('my-x-id').value;
-            if(!xId) return alert("X IDを入力してください");
-            
-            window.switchScreen('matching-screen');
-            document.getElementById('match-status').innerText = "待機列を確認中...";
+        const startMatching = async (mode) => {
+            switchScreen('matching-screen');
+            document.getElementById('match-status').innerText = "対戦相手を探しています...";
 
             try {
+                // 自分以外の待機者を探す
                 const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(10));
                 const snap = await getDocs(q);
                 let opponentDoc = null;
                 snap.forEach(d => { if(d.data().uid !== currentUser.uid) opponentDoc = d; });
 
                 if(opponentDoc) {
-                    // マッチ成立（部屋作成）
+                    // マッチ成立
                     const opp = opponentDoc.data();
                     await deleteDoc(doc(db, "waiting_room", opponentDoc.id));
-                    const songs = pickRandomSongs(mode);
+                    
                     const roomRef = await addDoc(collection(db, "rooms"), {
-                        mode: mode, songs: songs, createdAt: new Date(),
-                        player1: { uid: opp.uid, xId: opp.xId, result: null },
-                        player2: { uid: currentUser.uid, xId: xId, result: null }
+                        mode: mode, songs: pickRandomSongs(mode), createdAt: new Date(),
+                        // ユーザー情報はDB保存されているので、ここには必要最小限か、スナップショットを入れる
+                        player1: { uid: opp.uid, xId: opp.xId, displayName: opp.displayName, result: null },
+                        player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, result: null }
                     });
                     
-                    // ★重要：部屋IDを保存★
                     localStorage.setItem('current_room_id', roomRef.id);
                     watchRoom(roomRef.id);
                 } else {
                     // 待機
                     const ref = await addDoc(collection(db, "waiting_room"), {
-                        uid: currentUser.uid, mode: mode, xId: xId, rate: currentRate, createdAt: new Date()
+                        uid: currentUser.uid, 
+                        mode: mode, 
+                        xId: userData.xId, 
+                        displayName: userData.displayName, // 待機リストにも名前を表示できるように
+                        rate: userData.rate, 
+                        createdAt: new Date()
                     });
                     waitingDocId = ref.id;
-                    document.getElementById('match-status').innerText = "対戦相手を待っています...";
                     const roomQ = query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid));
                     unsubscribeRoom = onSnapshot(roomQ, snap => {
                         snap.docChanges().forEach(c => {
                             if(c.type === "added") {
-                                waitingDocId = null; 
-                                unsubscribeRoom(); 
-                                // ★重要：部屋IDを保存★
+                                waitingDocId = null; unsubscribeRoom();
                                 localStorage.setItem('current_room_id', c.doc.id);
                                 watchRoom(c.doc.id);
                             }
                         });
                     });
                 }
-            } catch(e) { console.error(e); alert("エラー"); location.reload(); }
+            } catch(e) { console.error(e); alert("エラー: "+e.message); switchScreen('title-screen'); }
         };
 
-        // --- 部屋監視ロジック（復帰対応版） ---
         const watchRoom = (roomId) => {
             currentRoomId = roomId;
             unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
                 if(!docSnap.exists()) {
-                    // 部屋が消滅している場合
                     localStorage.removeItem('current_room_id');
-                    alert("部屋が見つかりません（解散されました）");
-                    window.location.reload();
+                    alert("部屋が解散されました");
+                    location.reload();
                     return;
                 }
                 const data = docSnap.data();
@@ -320,55 +488,42 @@
                 
                 currentMatchData = { me, opponent, songs: data.songs, isP1 };
 
-                // ★状態判断ロジック★
-                // 今のDOMの状態ではなく、DBのデータ状態(me.resultなど)から表示すべき画面を決定する
-                
+                // 画面遷移判定
                 if (me.result && opponent.result) {
-                    // 1. 両方結果が出ている → 判定へ
-                     checkAndFinalize(data.player1.result, data.player2.result, isP1);
-                
+                    checkAndFinalize(data.player1.result, data.player2.result, isP1);
                 } else if (me.result && !opponent.result) {
-                    // 2. 自分は出したけど相手待ち → 待機画面へ
                     if (!document.getElementById('waiting-result-screen').classList.contains('active')) {
-                        window.switchScreen('waiting-result-screen');
+                        switchScreen('waiting-result-screen');
                     }
-
                 } else {
-                    // 3. まだ結果を出していない → 曲発表/申告画面へ
-                    // 既に曲発表画面や申告画面にいるならアニメーション再実行はしない
-                    const isAlreadyInGame = document.getElementById('reveal-screen').classList.contains('active') ||
-                                            document.getElementById('report-screen').classList.contains('active');
-                    
-                    if (!isAlreadyInGame) {
-                        // リロード直後などはここに来る。アニメーションを即完了状態で表示させるか、もう一度見せるか。
-                        // 今回はもう一度見せる形にする
-                        startReveal(opponent, data.songs);
-                    }
+                    const isGaming = document.getElementById('reveal-screen').classList.contains('active') ||
+                                     document.getElementById('report-screen').classList.contains('active');
+                    if (!isGaming) startReveal(opponent, data.songs);
                 }
             });
         };
 
         const startReveal = async (opponent, songs) => {
-            window.switchScreen('reveal-screen');
-            document.getElementById('opponent-x-display').innerText = opponent.xId;
+            switchScreen('reveal-screen');
+            // 相手の名前とIDを表示
+            document.getElementById('opponent-x-display').innerText = `${opponent.displayName}\n(${opponent.xId})`;
+            
             const con = document.getElementById('song-reveal-container');
             con.innerHTML = "";
-            
-            // リロード時はサクサク表示する
             for(let i=0; i<songs.length; i++){
-                await new Promise(r=>setTimeout(r, 200)); // 少し早めに
+                await new Promise(r=>setTimeout(r, 400));
                 const d = document.createElement('div');
-                d.className = 'song-reveal-item';
-                d.innerHTML = `<span class="song-badge">${i+1}曲目</span> ${songs[i]}`;
+                d.style.cssText = "background:#fff3e0; border:2px solid #ff9800; padding:10px; margin:5px 0; border-radius:8px; font-weight:bold; opacity:0; transform:translateX(-10px); transition:0.3s;";
+                d.innerHTML = `<span style="background:#ff5722; color:white; padding:2px 5px; border-radius:4px; font-size:0.8rem; margin-right:5px;">${i+1}</span> ${songs[i]}`;
                 con.appendChild(d);
-                setTimeout(()=>d.classList.add('show'),50);
+                setTimeout(()=> { d.style.opacity=1; d.style.transform="translateX(0)"; }, 50);
             }
             document.getElementById('goto-report-btn').style.display = 'inline-block';
         };
 
         window.goToReportScreen = () => {
-            window.switchScreen('report-screen');
-            document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.xId;
+            switchScreen('report-screen');
+            document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
             document.getElementById('rep-song-1').innerText = currentMatchData.songs[0];
         };
 
@@ -378,28 +533,43 @@
             document.getElementById('modal-selection').innerText = map[res];
             document.getElementById('confirm-modal').style.display = 'flex';
         };
-        window.closeModal = () => document.getElementById('confirm-modal').style.display = 'none';
 
         window.submitResult = async () => {
-            closeModal();
-            window.switchScreen('waiting-result-screen');
+            closeModal('confirm-modal');
+            switchScreen('waiting-result-screen');
             const field = currentMatchData.isP1 ? "player1.result" : "player2.result";
             await updateDoc(doc(db, "rooms", currentRoomId), { [field]: selectedResult });
         };
 
-        const checkAndFinalize = (p1Res, p2Res, amIP1) => {
+        const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
 
             let valid = false;
-            if (myRes === 'WIN' && oppRes === 'LOSE') valid = true;
-            if (myRes === 'LOSE' && oppRes === 'WIN') valid = true;
-            if (myRes === 'DRAW' && oppRes === 'DRAW') valid = true;
+            if ((myRes === 'WIN' && oppRes === 'LOSE') ||
+                (myRes === 'LOSE' && oppRes === 'WIN') ||
+                (myRes === 'DRAW' && oppRes === 'DRAW')) {
+                valid = true;
+            }
 
             if (valid) {
-                // 結果確定したらIDを消す
                 localStorage.removeItem('current_room_id');
-                showFinalResult(myRes);
+                if(unsubscribeRoom) unsubscribeRoom();
+                
+                // ★ここでレートを計算してDB(users)に保存する処理を追加
+                let newRate = userData.rate;
+                let diff = 0;
+                if(myRes === 'WIN') diff = 20;
+                if(myRes === 'LOSE') diff = -20;
+                newRate += diff;
+
+                // データベース更新 (自分の分だけ更新すればOK)
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    rate: newRate
+                });
+                userData.rate = newRate; // ローカルも更新
+
+                showFinalResult(myRes, diff, newRate);
             } else {
                 document.getElementById('error-modal').style.display = 'flex';
             }
@@ -407,51 +577,38 @@
 
         window.retryReport = () => {
             document.getElementById('error-modal').style.display = 'none';
-            window.switchScreen('report-screen');
+            switchScreen('report-screen');
         };
 
-        const showFinalResult = (result) => {
-            if(unsubscribeRoom) unsubscribeRoom();
-            unsubscribeRoom = null;
-            window.switchScreen('final-result-screen');
-            
+        const showFinalResult = (result, diff, currentRate) => {
+            switchScreen('final-result-screen');
             const title = document.getElementById('final-title');
-            const msg = document.getElementById('final-message');
-            const rateVal = document.getElementById('anim-rate-val');
-            const rateDiff = document.getElementById('anim-rate-diff');
-            let endRate = currentRate;
-            let diffText = "+0";
-
+            const diffEl = document.getElementById('anim-rate-diff');
+            
             if(result === 'WIN') {
-                title.innerText = "YOU WIN!"; title.className = "result-title win-color";
-                endRate += 20; diffText = "+20"; rateDiff.style.color = "#e91e63";
+                title.innerText = "YOU WIN!"; title.style.color = "#e91e63";
+                diffEl.innerText = "+" + diff; diffEl.style.color = "#e91e63";
             } else if(result === 'LOSE') {
-                title.innerText = "YOU LOSE..."; title.className = "result-title lose-color";
-                endRate -= 20; diffText = "-20"; rateDiff.style.color = "#2196f3";
+                title.innerText = "YOU LOSE..."; title.style.color = "#2196f3";
+                diffEl.innerText = diff; diffEl.style.color = "#2196f3";
             } else {
-                title.innerText = "DRAW"; title.className = "result-title draw-color";
-                rateDiff.style.color = "#9c27b0";
+                title.innerText = "DRAW"; title.style.color = "#9c27b0";
+                diffEl.innerText = "±0"; diffEl.style.color = "#9c27b0";
             }
 
-            rateVal.innerText = currentRate;
-            rateDiff.innerText = diffText;
-            setTimeout(() => {
-                rateDiff.classList.add('show');
-                // 簡易カウント
-                rateVal.innerText = endRate; 
-            }, 500);
+            document.getElementById('anim-rate-val').innerText = currentRate;
+            setTimeout(() => diffEl.classList.add('show'), 500);
         };
 
-        // タイトルへ戻る処理（完全にリセット）
         window.returnToTitle = () => {
             localStorage.removeItem('current_room_id');
-            window.location.reload();
+            location.reload();
         };
 
         window.cancelMatching = async () => {
             localStorage.removeItem('current_room_id');
             if(waitingDocId) await deleteDoc(doc(db, "waiting_room", waitingDocId));
-            window.location.reload();
+            switchScreen('title-screen');
         };
     </script>
 </body>
