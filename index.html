@@ -6,39 +6,58 @@
     <title>太鼓レーティングマッチ</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;800&display=swap" rel="stylesheet">
     <style>
-        /* --- デザイン定義 --- */
+        /* --- 基本リセット --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
             font-family: 'M PLUS Rounded 1c', "Hiragino Kaku Gothic ProN", sans-serif;
             background-color: #fce4d6;
             background-image: radial-gradient(#ffccbc 10%, transparent 10%);
             background-size: 20px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             color: #333;
-            overflow: hidden;
+            /* スクロール許可 */
+            overflow-y: auto;
+            min-height: 100vh;
         }
+
+        /* --- メインコンテナ（表示モードで変化） --- */
         .game-container {
             background: #fff;
-            width: 100%;
-            max-width: 500px;
-            height: 90vh;
-            max-height: 800px;
             padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             text-align: center;
-            border: 4px solid #ff5722;
             position: relative;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
+            transition: all 0.3s ease;
+            margin: 0 auto;
         }
+
+        /* PCモード（カード型）のデザイン */
+        .game-container.pc-mode {
+            width: 100%;
+            max-width: 500px;
+            min-height: 800px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 4px solid #ff5722;
+        }
+
+        /* スマホモード（全画面）のデザイン */
+        .game-container.mobile-mode {
+            width: 100%;
+            min-height: 100vh; /* 画面いっぱい */
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* --- 共通パーツ --- */
         h1, h2, h3 { font-weight: 800; }
         .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
         .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; }
+        
         button { font-family: inherit; outline: none; }
         .btn { border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.1s; width: 100%; font-weight: bold; color: white; margin-bottom: 10px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); position: relative; top: 0;}
         .btn:active { top: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
@@ -46,10 +65,24 @@
         .btn-blue { background: #2196f3; }
         .btn-green { background: #4caf50; }
         .btn-gray { background: #757575; }
+        
+        /* 表示切り替えボタン */
+        .view-toggle-box {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+        .view-btn {
+            background: transparent; border: 2px solid #aaa; color: #555;
+            padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 0 5px;
+        }
+        .view-btn.active { background: #555; color: white; border-color: #555; }
+
         .login-btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .btn-google { background: #db4437; }
         .btn-x { background: #000; }
         .btn-email { background: #607d8b; }
+        
         .profile-bar {
             background: #333; color: white; padding: 10px 15px; border-radius: 12px;
             display: flex; justify-content: space-between; align-items: center;
@@ -58,28 +91,34 @@
         .profile-name { font-size: 0.9rem; text-align: left; }
         .profile-rate { color: #ffd700; font-size: 1.1rem; }
         .settings-icon { cursor: pointer; font-size: 1.2rem; }
+
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .menu-btn { height: 80px; font-size: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
         .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         .rank-table th { background: #ffccbc; padding: 8px; color: #d84315; }
         .rank-table td { border-bottom: 1px solid #eee; padding: 8px; }
         .rank-1 { color: #d4af37; font-weight: bold; font-size: 1.1rem; }
         .rank-2 { color: #a0a0a0; font-weight: bold; }
         .rank-3 { color: #cd7f32; font-weight: bold; }
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
+
+        .screen { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; }
         .screen.active { display: flex; }
         .center-content { justify-content: center; }
+
+        /* スクロールが必要な要素用 */
+        .scrollable-content { width: 100%; overflow-y: auto; max-height: 60vh; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s; }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
         .input-field { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; }
         .input-label { display: block; text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: #555; }
         .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff5722; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .rate-diff { font-size: 1.5rem; opacity: 0; transition: 0.5s; display: block; height: 30px; }
         .rate-diff.show { opacity: 1; transform: translateY(-5px); }
-
-        /* 追加スタイル */
         .song-list-box { text-align: left; margin: 10px 0; padding-left: 20px; font-weight: bold; color: #555; font-size: 0.9rem;}
         .song-list-item { margin-bottom: 5px; }
         .instruction-box { background: #e3f2fd; border: 2px solid #2196f3; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #0d47a1; margin-bottom: 15px; text-align: left; }
@@ -87,7 +126,7 @@
 </head>
 <body>
 
-    <div class="game-container">
+    <div id="main-container" class="game-container mobile-mode">
         
         <div id="login-screen" class="screen active center-content">
             <h1 class="title-logo">DON-DER MATCH</h1>
@@ -103,6 +142,12 @@
                     <button class="btn btn-email" onclick="loginWithEmail()">登録/ログイン</button>
                 </div>
                 <button class="btn btn-gray" onclick="loginAnon()">匿名で始める</button>
+            </div>
+
+            <div class="view-toggle-box">
+                <p style="font-size:0.8rem; margin-bottom:10px;">表示モード切り替え</p>
+                <button class="view-btn active" id="btn-mobile" onclick="setViewMode('mobile')">スマホ版</button>
+                <button class="view-btn" id="btn-pc" onclick="setViewMode('pc')">PC版</button>
             </div>
         </div>
 
@@ -141,29 +186,28 @@
                 <span id="opponent-x-display"></span>
             </div>
             <div id="song-reveal-container" style="width:100%; margin-top:10px; flex:1;"></div>
-            <button id="goto-report-btn" class="btn btn-green" style="display:none;" onclick="goToReportScreen()">結果を報告する</button>
+            <button id="goto-report-btn" class="btn btn-green" style="display:none; margin-top:20px; margin-bottom:20px;" onclick="goToReportScreen()">結果を報告する</button>
         </div>
 
         <div id="report-screen" class="screen center-content" style="justify-content: flex-start; padding-top: 20px;">
             <h2>結果報告</h2>
-            
-            <div class="instruction-box">
-                <strong>【対戦手順】</strong><br>
-                1. 下記のX ID宛にDM等でリザルトを交換<br>
-                2. 3曲の良の合計数を比較<br>
-                3. 結果（勝ち・負け）を申告してください
+            <div class="scrollable-content">
+                <div class="instruction-box">
+                    <strong>【対戦手順】</strong><br>
+                    1. X ID宛にDM等でリザルトを交換<br>
+                    2. 3曲の良の合計数を比較<br>
+                    3. 結果（勝ち・負け）を申告
+                </div>
+                <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
+                    <p><strong>相手:</strong> <span id="rep-opp-name" style="font-weight:bold;"></span></p>
+                    <p><strong>X ID:</strong> <span id="rep-opp-xid" style="color:#1da1f2; font-weight:bold;"></span></p>
+                    <hr style="margin:10px 0; border:none; border-top:1px solid #ddd;">
+                    <p><strong>▼ 課題曲リスト</strong></p>
+                    <div id="rep-song-list" class="song-list-box"></div>
+                </div>
             </div>
-
-            <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
-                <p><strong>相手の名前:</strong> <span id="rep-opp-name" style="font-weight:bold;"></span></p>
-                <p><strong>相手X ID:</strong> <span id="rep-opp-xid" style="color:#1da1f2; font-weight:bold;"></span></p>
-                <hr style="margin:10px 0; border:none; border-top:1px solid #ddd;">
-                <p><strong>▼ 課題曲リスト</strong></p>
-                <div id="rep-song-list" class="song-list-box"></div>
-            </div>
-            
             <p style="font-weight:bold; margin-bottom:10px;">あなたの勝敗は？</p>
-            <div style="display:flex; gap:10px; width:100%;">
+            <div style="display:flex; gap:10px; width:100%; margin-bottom:20px;">
                 <button class="btn" style="background:#e91e63;" onclick="confirmResult('WIN')">勝ち</button>
                 <button class="btn" style="background:#9c27b0;" onclick="confirmResult('DRAW')">引分</button>
                 <button class="btn" style="background:#2196f3;" onclick="confirmResult('LOSE')">負け</button>
@@ -241,6 +285,7 @@
         import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // ★★★ APIキーを貼り付けてください ★★★
         const firebaseConfig = {
   apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
   authDomain: "taikorating.firebaseapp.com",
@@ -270,6 +315,37 @@
             'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
 
+        // --- View Mode Control ---
+        window.setViewMode = (mode) => {
+            const container = document.getElementById('main-container');
+            const btnMobile = document.getElementById('btn-mobile');
+            const btnPc = document.getElementById('btn-pc');
+
+            if (mode === 'pc') {
+                container.classList.remove('mobile-mode');
+                container.classList.add('pc-mode');
+                btnMobile.classList.remove('active');
+                btnPc.classList.add('active');
+                localStorage.setItem('view_mode', 'pc');
+            } else {
+                container.classList.remove('pc-mode');
+                container.classList.add('mobile-mode');
+                btnMobile.classList.add('active');
+                btnPc.classList.remove('active');
+                localStorage.setItem('view_mode', 'mobile');
+            }
+        };
+
+        // 初期ロード時に設定を読み込む
+        const savedMode = localStorage.getItem('view_mode');
+        if (savedMode) {
+            window.setViewMode(savedMode);
+        } else {
+            // デフォルトはスマホ版
+            window.setViewMode('mobile');
+        }
+
+        // --- Auth & Game Logic ---
         window.loginAnon = () => signInAnonymously(auth).catch(e => alert(e.message));
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
         window.loginWithEmail = async () => {
@@ -417,12 +493,11 @@
             } catch(e) { console.error(e); alert("マッチングエラー"); switchScreen('title-screen'); }
         };
 
-        // --- 部屋監視ロジック (バグ修正版) ---
         const watchRoom = (roomId) => {
             currentRoomId = roomId;
             isFinalizing = false;
             unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
-                // ★ 1. 相手切断・部屋消滅時の処理を追加
+                // 相手切断時の処理
                 if(!docSnap.exists()) {
                     localStorage.removeItem('current_room_id');
                     alert("対戦相手が退出したか、部屋が解散されました。\nタイトルへ戻ります。");
@@ -469,13 +544,11 @@
             document.getElementById('goto-report-btn').style.display = 'inline-block';
         };
 
-        // ★ 2. 申告画面の表示詳細化
         window.goToReportScreen = () => {
             switchScreen('report-screen');
             document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
             document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
             
-            // 3曲すべてを表示
             const listContainer = document.getElementById('rep-song-list');
             listContainer.innerHTML = "";
             currentMatchData.songs.forEach((song, i) => {
@@ -501,12 +574,11 @@
                 await updateDoc(doc(db, "rooms", currentRoomId), { [field]: selectedResult });
             } catch(e) {
                 console.error(e);
-                alert("送信に失敗しました。もう一度試してください。");
+                alert("送信に失敗しました。");
                 switchScreen('report-screen');
             }
         };
 
-        // ★ 3. レート計算ロジックの修正
         const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
@@ -522,14 +594,11 @@
                 localStorage.removeItem('current_room_id');
                 if(unsubscribeRoom) unsubscribeRoom();
                 
-                // 数値として確実に計算する
                 const currentRate = Number(userData.rate) || 1500;
                 let newRate = currentRate;
                 let diff = 0;
-                
                 if(myRes === 'WIN') diff = 20;
                 if(myRes === 'LOSE') diff = -20;
-                
                 newRate = currentRate + diff;
 
                 try {
@@ -540,7 +609,6 @@
                 } catch (e) {
                     console.error("レート保存エラー:", e);
                 }
-
                 showFinalResult(myRes, diff, newRate);
             } else {
                 isFinalizing = false;
