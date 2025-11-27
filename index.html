@@ -20,13 +20,11 @@
             color: #333;
             overflow: hidden;
         }
-        
-        /* メインコンテナ */
         .game-container {
             background: #fff;
             width: 100%;
             max-width: 500px;
-            height: 90vh; /* 画面の高さの90% */
+            height: 90vh;
             max-height: 800px;
             padding: 20px;
             border-radius: 20px;
@@ -36,14 +34,11 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* コンテンツが多い場合はスクロール */
+            overflow-y: auto;
         }
-
-        /* 共通パーツ */
         h1, h2, h3 { font-weight: 800; }
         .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
         .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; }
-        
         button { font-family: inherit; outline: none; }
         .btn { border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.1s; width: 100%; font-weight: bold; color: white; margin-bottom: 10px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); position: relative; top: 0;}
         .btn:active { top: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
@@ -51,14 +46,10 @@
         .btn-blue { background: #2196f3; }
         .btn-green { background: #4caf50; }
         .btn-gray { background: #757575; }
-        
-        /* ログイン画面用 */
         .login-btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .btn-google { background: #db4437; }
         .btn-x { background: #000; }
         .btn-email { background: #607d8b; }
-        
-        /* プレイヤー情報バー */
         .profile-bar {
             background: #333; color: white; padding: 10px 15px; border-radius: 12px;
             display: flex; justify-content: space-between; align-items: center;
@@ -67,40 +58,31 @@
         .profile-name { font-size: 0.9rem; text-align: left; }
         .profile-rate { color: #ffd700; font-size: 1.1rem; }
         .settings-icon { cursor: pointer; font-size: 1.2rem; }
-
-        /* メニューボタン群 */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .menu-btn { height: 80px; font-size: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        
-        /* ランキング */
         .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         .rank-table th { background: #ffccbc; padding: 8px; color: #d84315; }
         .rank-table td { border-bottom: 1px solid #eee; padding: 8px; }
-        .rank-1 { color: #d4af37; font-weight: bold; font-size: 1.1rem; } /* 金 */
-        .rank-2 { color: #a0a0a0; font-weight: bold; } /* 銀 */
-        .rank-3 { color: #cd7f32; font-weight: bold; } /* 銅 */
-
-        /* 画面切り替え */
+        .rank-1 { color: #d4af37; font-weight: bold; font-size: 1.1rem; }
+        .rank-2 { color: #a0a0a0; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
         .screen.active { display: flex; }
         .center-content { justify-content: center; }
-
-        /* モーダル */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s; }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
         .input-field { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; }
         .input-label { display: block; text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: #555; }
-
-        /* ローダー */
         .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff5722; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* 結果画面のアニメーション */
         .rate-diff { font-size: 1.5rem; opacity: 0; transition: 0.5s; display: block; height: 30px; }
         .rate-diff.show { opacity: 1; transform: translateY(-5px); }
 
+        /* 追加スタイル */
+        .song-list-box { text-align: left; margin: 10px 0; padding-left: 20px; font-weight: bold; color: #555; font-size: 0.9rem;}
+        .song-list-item { margin-bottom: 5px; }
+        .instruction-box { background: #e3f2fd; border: 2px solid #2196f3; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #0d47a1; margin-bottom: 15px; text-align: left; }
     </style>
 </head>
 <body>
@@ -110,11 +92,9 @@
         <div id="login-screen" class="screen active center-content">
             <h1 class="title-logo">DON-DER MATCH</h1>
             <p class="sub-title">ログインして対戦を始めよう</p>
-            
             <div class="login-btn-group" style="width: 100%;">
                 <button class="btn btn-google" onclick="loginWithGoogle()">Googleでログイン</button>
-                <button class="btn btn-x" onclick="alert('XログインにはAPI設定が必要です。\n現在は他の方法をご利用ください。')">X (Twitter) でログイン</button>
-                
+                <button class="btn btn-x" onclick="alert('XログインにはAPI設定が必要です')">X (Twitter) でログイン</button>
                 <div style="display:flex; gap:5px;">
                     <input type="email" id="email-input" class="input-field" placeholder="メールアドレス" style="margin:0;">
                     <input type="password" id="pass-input" class="input-field" placeholder="パスワード" style="margin:0;">
@@ -122,14 +102,12 @@
                 <div style="display:flex; gap:5px;">
                     <button class="btn btn-email" onclick="loginWithEmail()">登録/ログイン</button>
                 </div>
-
                 <button class="btn btn-gray" onclick="loginAnon()">匿名で始める</button>
             </div>
         </div>
 
         <div id="title-screen" class="screen">
             <h1 class="title-logo">DON-DER MATCH</h1>
-            
             <div class="profile-bar">
                 <div>
                     <div class="profile-name" id="display-name">Loading...</div>
@@ -140,16 +118,10 @@
                     <span class="settings-icon" onclick="openProfileModal()">⚙️設定</span>
                 </div>
             </div>
-
             <div class="menu-grid">
-                <button class="btn btn-orange menu-btn" onclick="openRanking()">
-                    <span>🏆</span>ランキング
-                </button>
-                <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')">
-                    <span>📜</span>対戦履歴
-                </button>
+                <button class="btn btn-orange menu-btn" onclick="openRanking()"><span>🏆</span>ランキング</button>
+                <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')"><span>📜</span>対戦履歴</button>
             </div>
-
             <p style="font-weight:bold; margin-bottom:10px;">対戦難易度を選択</p>
             <button class="btn btn-green" onclick="tryStartMatching('normal')">難易度 F ～ A+</button>
             <button class="btn btn-orange" onclick="tryStartMatching('hard')">難易度 S ～ SS</button>
@@ -172,12 +144,25 @@
             <button id="goto-report-btn" class="btn btn-green" style="display:none;" onclick="goToReportScreen()">結果を報告する</button>
         </div>
 
-        <div id="report-screen" class="screen center-content">
+        <div id="report-screen" class="screen center-content" style="justify-content: flex-start; padding-top: 20px;">
             <h2>結果報告</h2>
-            <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
-                <p><strong>相手:</strong> <span id="rep-opp-name"></span></p>
-                <p><strong>課題曲:</strong> <span id="rep-song-1"></span> ...</p>
+            
+            <div class="instruction-box">
+                <strong>【対戦手順】</strong><br>
+                1. 下記のX ID宛にDM等でリザルトを交換<br>
+                2. 3曲の良の合計数を比較<br>
+                3. 結果（勝ち・負け）を申告してください
             </div>
+
+            <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left; margin-bottom:20px;">
+                <p><strong>相手の名前:</strong> <span id="rep-opp-name" style="font-weight:bold;"></span></p>
+                <p><strong>相手X ID:</strong> <span id="rep-opp-xid" style="color:#1da1f2; font-weight:bold;"></span></p>
+                <hr style="margin:10px 0; border:none; border-top:1px solid #ddd;">
+                <p><strong>▼ 課題曲リスト</strong></p>
+                <div id="rep-song-list" class="song-list-box"></div>
+            </div>
+            
+            <p style="font-weight:bold; margin-bottom:10px;">あなたの勝敗は？</p>
             <div style="display:flex; gap:10px; width:100%;">
                 <button class="btn" style="background:#e91e63;" onclick="confirmResult('WIN')">勝ち</button>
                 <button class="btn" style="background:#9c27b0;" onclick="confirmResult('DRAW')">引分</button>
@@ -189,6 +174,7 @@
             <div class="loader"></div>
             <h3>確認中...</h3>
             <p>相手の入力を待っています</p>
+            <p style="font-size:0.8rem; color:red; margin-top:20px;">相手が部屋を抜けた場合、<br>自動でタイトルに戻ります。</p>
         </div>
 
         <div id="final-result-screen" class="screen center-content">
@@ -205,9 +191,8 @@
         <div class="modal-box">
             <h3>プロフィール設定</h3>
             <div style="margin-top:20px;">
-                <label class="input-label">プレイヤー名 (アプリ内表示)</label>
+                <label class="input-label">プレイヤー名</label>
                 <input type="text" id="edit-name" class="input-field" placeholder="例: どんちゃん">
-                
                 <label class="input-label">X(Twitter) ID</label>
                 <p style="font-size:0.7rem; color:#e91e63; text-align:left;">※対戦には先頭に @ が必要です</p>
                 <input type="text" id="edit-xid" class="input-field" placeholder="例: @taiko_master">
@@ -221,8 +206,7 @@
 
     <div id="ranking-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:450px;">
-            <h3>レーティングランキング</h3>
-            <p style="font-size:0.8rem; margin-bottom:10px;">Top 10 Players</p>
+            <h3>ランキング</h3>
             <div style="max-height:300px; overflow-y:auto;">
                 <table class="rank-table">
                     <thead><tr><th>順位</th><th>名前</th><th>レート</th></tr></thead>
@@ -247,7 +231,7 @@
     <div id="error-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="color:#d32f2f;">結果不一致</h3>
-            <p>お互いの申告が食い違っています。<br>もう一度入力してください。</p>
+            <p>申告が食い違っています。<br>もう一度入力してください。</p>
             <button class="btn btn-orange" onclick="retryReport()">再入力</button>
         </div>
     </div>
@@ -257,7 +241,6 @@
         import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ★★★ APIキーを貼り付けてください ★★★
         const firebaseConfig = {
   apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
   authDomain: "taikorating.firebaseapp.com",
@@ -273,90 +256,72 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 変数
         let currentUser = null;
-        let userData = { displayName: "名無し", xId: "未設定", rate: 1500 }; // デフォルト値
+        let userData = { displayName: "名無し", xId: "未設定", rate: 1500 }; 
         let waitingDocId = null;
         let currentRoomId = null;
         let unsubscribeRoom = null;
         let currentMatchData = {};
         let selectedResult = null;
+        let isFinalizing = false;
 
         const songDatabase = {
             'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
             'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
 
-        // --- 認証系 ---
         window.loginAnon = () => signInAnonymously(auth).catch(e => alert(e.message));
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
         window.loginWithEmail = async () => {
             const email = document.getElementById('email-input').value;
             const pass = document.getElementById('pass-input').value;
-            if(!email || !pass) return alert("メールとパスワードを入力してください");
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } catch(e) {
-                // ログイン失敗なら作成を試みる（簡易実装）
-                try {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                } catch(e2) {
-                    alert("ログイン/登録エラー: " + e2.message);
-                }
-            }
+            if(!email || !pass) return alert("入力してください");
+            try { await signInWithEmailAndPassword(auth, email, pass); }
+            catch(e) { try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e2) { alert(e2.message); } }
         };
 
-        // ログイン監視 & データ同期
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 currentUser = user;
-                // ユーザーデータの取得・作成 (usersコレクション)
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-
-                if (userSnap.exists()) {
-                    userData = userSnap.data();
-                } else {
-                    // 新規作成
-                    userData = { displayName: "名無しどん", xId: "未設定", rate: 1500, createdAt: new Date() };
-                    await setDoc(userRef, userData);
-                }
-                updateProfileUI();
-                switchScreen('title-screen'); // タイトルへ移動
-
-                // セッション復帰チェック
-                const savedRoomId = localStorage.getItem('current_room_id');
-                if (savedRoomId && userSnap.exists()) { // データロード完了後に復帰
-                    checkRestore(savedRoomId);
+                try {
+                    const userRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        userData = userSnap.data();
+                        if(userData.rate === undefined) userData.rate = 1500;
+                    } else {
+                        userData = { displayName: "名無しどん", xId: "未設定", rate: 1500, createdAt: new Date() };
+                        await setDoc(userRef, userData);
+                    }
+                    updateProfileUI();
+                    switchScreen('title-screen');
+                    
+                    const savedRoomId = localStorage.getItem('current_room_id');
+                    if (savedRoomId) checkRestore(savedRoomId);
+                } catch(e) {
+                    console.error("Login Data Error:", e);
+                    switchScreen('title-screen');
                 }
             }
         });
 
-        // ユーザー情報をUIに反映
         const updateProfileUI = () => {
             document.getElementById('display-name').innerText = userData.displayName;
             document.getElementById('display-xid').innerText = userData.xId;
             document.getElementById('display-rate').innerText = userData.rate;
-            
-            // 編集モーダルにもセット
             document.getElementById('edit-name').value = userData.displayName;
             document.getElementById('edit-xid').value = userData.xId;
         };
 
-        // --- プロフィール設定 ---
         window.openProfileModal = () => document.getElementById('profile-modal').style.display = 'flex';
-        
         window.saveProfile = async () => {
             const newName = document.getElementById('edit-name').value;
             const newXid = document.getElementById('edit-xid').value;
-            
             if(!newName) return alert("名前を入力してください");
-
-            // Firestore更新
-            await updateDoc(doc(db, "users", currentUser.uid), {
+            await setDoc(doc(db, "users", currentUser.uid), {
                 displayName: newName,
                 xId: newXid || "未設定"
-            });
+            }, { merge: true });
             
             userData.displayName = newName;
             userData.xId = newXid || "未設定";
@@ -364,47 +329,36 @@
             closeModal('profile-modal');
         };
 
-        // --- ランキング ---
         window.openRanking = async () => {
             document.getElementById('ranking-modal').style.display = 'flex';
             const tbody = document.getElementById('ranking-list');
             tbody.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
-
-            const q = query(collection(db, "users"), orderBy("rate", "desc"), limit(10));
-            const snapshot = await getDocs(q);
-            
-            tbody.innerHTML = "";
-            let rank = 1;
-            snapshot.forEach(doc => {
-                const d = doc.data();
-                const tr = document.createElement('tr');
-                let rankClass = "";
-                if(rank===1) rankClass="rank-1";
-                if(rank===2) rankClass="rank-2";
-                if(rank===3) rankClass="rank-3";
-                
-                tr.innerHTML = `
-                    <td class="${rankClass}">${rank}</td>
-                    <td style="text-align:left;">${d.displayName}</td>
-                    <td>${d.rate}</td>
-                `;
-                tbody.appendChild(tr);
-                rank++;
-            });
+            try {
+                const q = query(collection(db, "users"), orderBy("rate", "desc"), limit(10));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = "";
+                let rank = 1;
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="rank-${rank}">${rank}</td><td style="text-align:left;">${d.displayName || '名無し'}</td><td>${d.rate || 1500}</td>`;
+                    tbody.appendChild(tr);
+                    rank++;
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="3">読み込み失敗</td></tr>';
+            }
         };
 
-        // --- マッチング開始 (バリデーション付き) ---
         window.tryStartMatching = (mode) => {
-            // 条件チェック
             if (userData.xId === "未設定" || !userData.xId.startsWith("@")) {
-                alert("【対戦エラー】\nX IDが正しく設定されていません。\n設定ボタンから「@」で始まるIDを設定してください。\n(例: @taiko_master)");
+                alert("【設定エラー】\nX IDを設定してください。\n(@から始まるIDが必要です)");
                 openProfileModal();
                 return;
             }
             startMatching(mode);
         };
 
-        // --- 以下、前回までのマッチングロジック (少し修正) ---
         const switchScreen = (id) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -412,9 +366,11 @@
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
         const checkRestore = async (roomId) => {
-             const roomSnap = await getDoc(doc(db, "rooms", roomId));
-             if(roomSnap.exists()) watchRoom(roomId);
-             else localStorage.removeItem('current_room_id');
+             try {
+                 const roomSnap = await getDoc(doc(db, "rooms", roomId));
+                 if(roomSnap.exists()) watchRoom(roomId);
+                 else localStorage.removeItem('current_room_id');
+             } catch(e) { localStorage.removeItem('current_room_id'); }
         };
 
         const pickRandomSongs = (mode) => {
@@ -425,37 +381,26 @@
         const startMatching = async (mode) => {
             switchScreen('matching-screen');
             document.getElementById('match-status').innerText = "対戦相手を探しています...";
-
             try {
-                // 自分以外の待機者を探す
                 const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(10));
                 const snap = await getDocs(q);
                 let opponentDoc = null;
                 snap.forEach(d => { if(d.data().uid !== currentUser.uid) opponentDoc = d; });
 
                 if(opponentDoc) {
-                    // マッチ成立
                     const opp = opponentDoc.data();
                     await deleteDoc(doc(db, "waiting_room", opponentDoc.id));
-                    
                     const roomRef = await addDoc(collection(db, "rooms"), {
                         mode: mode, songs: pickRandomSongs(mode), createdAt: new Date(),
-                        // ユーザー情報はDB保存されているので、ここには必要最小限か、スナップショットを入れる
                         player1: { uid: opp.uid, xId: opp.xId, displayName: opp.displayName, result: null },
                         player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, result: null }
                     });
-                    
                     localStorage.setItem('current_room_id', roomRef.id);
                     watchRoom(roomRef.id);
                 } else {
-                    // 待機
                     const ref = await addDoc(collection(db, "waiting_room"), {
-                        uid: currentUser.uid, 
-                        mode: mode, 
-                        xId: userData.xId, 
-                        displayName: userData.displayName, // 待機リストにも名前を表示できるように
-                        rate: userData.rate, 
-                        createdAt: new Date()
+                        uid: currentUser.uid, mode: mode, xId: userData.xId, displayName: userData.displayName, 
+                        rate: userData.rate, createdAt: new Date()
                     });
                     waitingDocId = ref.id;
                     const roomQ = query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid));
@@ -469,15 +414,18 @@
                         });
                     });
                 }
-            } catch(e) { console.error(e); alert("エラー: "+e.message); switchScreen('title-screen'); }
+            } catch(e) { console.error(e); alert("マッチングエラー"); switchScreen('title-screen'); }
         };
 
+        // --- 部屋監視ロジック (バグ修正版) ---
         const watchRoom = (roomId) => {
             currentRoomId = roomId;
+            isFinalizing = false;
             unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
+                // ★ 1. 相手切断・部屋消滅時の処理を追加
                 if(!docSnap.exists()) {
                     localStorage.removeItem('current_room_id');
-                    alert("部屋が解散されました");
+                    alert("対戦相手が退出したか、部屋が解散されました。\nタイトルへ戻ります。");
                     location.reload();
                     return;
                 }
@@ -488,9 +436,11 @@
                 
                 currentMatchData = { me, opponent, songs: data.songs, isP1 };
 
-                // 画面遷移判定
                 if (me.result && opponent.result) {
-                    checkAndFinalize(data.player1.result, data.player2.result, isP1);
+                    if (!isFinalizing) {
+                        isFinalizing = true;
+                        checkAndFinalize(data.player1.result, data.player2.result, isP1);
+                    }
                 } else if (me.result && !opponent.result) {
                     if (!document.getElementById('waiting-result-screen').classList.contains('active')) {
                         switchScreen('waiting-result-screen');
@@ -505,9 +455,7 @@
 
         const startReveal = async (opponent, songs) => {
             switchScreen('reveal-screen');
-            // 相手の名前とIDを表示
             document.getElementById('opponent-x-display').innerText = `${opponent.displayName}\n(${opponent.xId})`;
-            
             const con = document.getElementById('song-reveal-container');
             con.innerHTML = "";
             for(let i=0; i<songs.length; i++){
@@ -521,10 +469,21 @@
             document.getElementById('goto-report-btn').style.display = 'inline-block';
         };
 
+        // ★ 2. 申告画面の表示詳細化
         window.goToReportScreen = () => {
             switchScreen('report-screen');
             document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
-            document.getElementById('rep-song-1').innerText = currentMatchData.songs[0];
+            document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
+            
+            // 3曲すべてを表示
+            const listContainer = document.getElementById('rep-song-list');
+            listContainer.innerHTML = "";
+            currentMatchData.songs.forEach((song, i) => {
+                const item = document.createElement('div');
+                item.className = "song-list-item";
+                item.innerText = `${i+1}. ${song}`;
+                listContainer.appendChild(item);
+            });
         };
 
         window.confirmResult = (res) => {
@@ -538,9 +497,16 @@
             closeModal('confirm-modal');
             switchScreen('waiting-result-screen');
             const field = currentMatchData.isP1 ? "player1.result" : "player2.result";
-            await updateDoc(doc(db, "rooms", currentRoomId), { [field]: selectedResult });
+            try {
+                await updateDoc(doc(db, "rooms", currentRoomId), { [field]: selectedResult });
+            } catch(e) {
+                console.error(e);
+                alert("送信に失敗しました。もう一度試してください。");
+                switchScreen('report-screen');
+            }
         };
 
+        // ★ 3. レート計算ロジックの修正
         const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
@@ -556,21 +522,28 @@
                 localStorage.removeItem('current_room_id');
                 if(unsubscribeRoom) unsubscribeRoom();
                 
-                // ★ここでレートを計算してDB(users)に保存する処理を追加
-                let newRate = userData.rate;
+                // 数値として確実に計算する
+                const currentRate = Number(userData.rate) || 1500;
+                let newRate = currentRate;
                 let diff = 0;
+                
                 if(myRes === 'WIN') diff = 20;
                 if(myRes === 'LOSE') diff = -20;
-                newRate += diff;
+                
+                newRate = currentRate + diff;
 
-                // データベース更新 (自分の分だけ更新すればOK)
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    rate: newRate
-                });
-                userData.rate = newRate; // ローカルも更新
+                try {
+                    await setDoc(doc(db, "users", currentUser.uid), {
+                        rate: newRate
+                    }, { merge: true });
+                    userData.rate = newRate; 
+                } catch (e) {
+                    console.error("レート保存エラー:", e);
+                }
 
                 showFinalResult(myRes, diff, newRate);
             } else {
+                isFinalizing = false;
                 document.getElementById('error-modal').style.display = 'flex';
             }
         };
@@ -595,7 +568,6 @@
                 title.innerText = "DRAW"; title.style.color = "#9c27b0";
                 diffEl.innerText = "±0"; diffEl.style.color = "#9c27b0";
             }
-
             document.getElementById('anim-rate-val').innerText = currentRate;
             setTimeout(() => diffEl.classList.add('show'), 500);
         };
