@@ -63,6 +63,7 @@
         .btn-blue { background: #2196f3; }
         .btn-green { background: #4caf50; }
         .btn-gray { background: #757575; }
+        .btn-red { background: #d32f2f; }
         
         .view-toggle-box {
             margin-top: 30px;
@@ -170,7 +171,8 @@
         <div id="matching-screen" class="screen center-content">
             <div class="loader"></div>
             <h3>対戦相手を探しています...</h3>
-            <p id="match-status" style="color:#ff5722; margin-top:10px;"></p>
+            <p id="match-status" style="color:#ff5722; margin-top:10px; font-weight:bold;"></p>
+            <p style="font-size:0.8rem; color:#777; margin-top:5px;">※15秒経過すると自動キャンセルされます</p>
             <button class="btn btn-gray" style="margin-top:30px; width:50%;" onclick="cancelMatching()">キャンセル</button>
         </div>
 
@@ -208,13 +210,15 @@
                 <button class="btn" style="background:#9c27b0;" onclick="confirmResult('DRAW')">引分</button>
                 <button class="btn" style="background:#2196f3;" onclick="confirmResult('LOSE')">負け</button>
             </div>
+            
+            <button class="btn btn-red" style="margin-bottom:20px;" onclick="tryExitRoom()">退出する (無効試合)</button>
         </div>
 
         <div id="waiting-result-screen" class="screen center-content">
             <div class="loader"></div>
             <h3>確認中...</h3>
             <p>相手の入力を待っています</p>
-            <p style="font-size:0.8rem; color:red; margin-top:20px;">相手が部屋を抜けた場合、<br>自動でタイトルに戻ります。</p>
+            <p style="font-size:0.8rem; color:red; margin-top:20px;">※相手の通信が切れると<br>自動でエラーとなり終了します。</p>
         </div>
 
         <div id="final-result-screen" class="screen center-content">
@@ -276,6 +280,28 @@
         </div>
     </div>
 
+    <div id="exit-confirm-modal-1" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color:#d32f2f;">警告</h3>
+            <p>退出すると無効試合になります。<br>本当に退出しますか？</p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-gray" onclick="closeModal('exit-confirm-modal-1')">やめる</button>
+                <button class="btn btn-red" onclick="showExitConfirm2()">はい</button>
+            </div>
+        </div>
+    </div>
+    <div id="exit-confirm-modal-2" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color:#d32f2f;">最終確認</h3>
+            <p>本当に退出してよろしいですか？<br>(この操作は取り消せません)</p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-gray" onclick="closeModal('exit-confirm-modal-2')">やめる</button>
+                <button class="btn btn-red" onclick="forceExitRoom()">退出する</button>
+            </div>
+        </div>
+    </div>
+
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -305,11 +331,25 @@
         let currentMatchData = {};
         let selectedResult = null;
         let isFinalizing = false;
+        let matchTimer = null; // タイムアウト用
 
         const songDatabase = {
             'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
             'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
+
+        // --- タブ閉じ検知 (厳格モード) ---
+        const handleUnload = () => {
+            if (currentRoomId && currentUser) {
+                // 即座に削除リクエスト（同期不可だがベストエフォート）
+                deleteDoc(doc(db, "rooms", currentRoomId)).catch(()=>{});
+            }
+            if (waitingDocId) {
+                deleteDoc(doc(db, "waiting_room", waitingDocId)).catch(()=>{});
+            }
+        };
+        window.addEventListener('beforeunload', handleUnload);
+        window.addEventListener('pagehide', handleUnload);
 
         // --- View Mode ---
         window.setViewMode = (mode) => {
@@ -429,7 +469,7 @@
 
         const startMatching = async (mode) => {
             switchScreen('matching-screen');
-            document.getElementById('match-status').innerText = "対戦相手を探しています...";
+            document.getElementById('match-status').innerText = "対戦相手を待っています...";
             try {
                 const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(10));
                 const snap = await getDocs(q);
@@ -452,10 +492,25 @@
                         rate: userData.rate, createdAt: new Date()
                     });
                     waitingDocId = ref.id;
+                    
+                    // ★ 15秒自動キャンセルタイマー ★
+                    if(matchTimer) clearTimeout(matchTimer);
+                    matchTimer = setTimeout(async () => {
+                        if(waitingDocId) {
+                            if(unsubscribeRoom) unsubscribeRoom();
+                            unsubscribeRoom = null;
+                            try { await deleteDoc(doc(db, "waiting_room", waitingDocId)); } catch(e){}
+                            waitingDocId = null;
+                            switchScreen('title-screen');
+                            alert("【タイムアウト】\n一定時間マッチングしなかったため、\n放置防止の観点から自動キャンセルしました。\n\n再度お試しください。");
+                        }
+                    }, 15000); // 15秒
+
                     const roomQ = query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid));
                     unsubscribeRoom = onSnapshot(roomQ, snap => {
                         snap.docChanges().forEach(c => {
                             if(c.type === "added") {
+                                if(matchTimer) clearTimeout(matchTimer); // タイマー停止
                                 waitingDocId = null; unsubscribeRoom();
                                 localStorage.setItem('current_room_id', c.doc.id);
                                 watchRoom(c.doc.id);
@@ -468,11 +523,12 @@
 
         const watchRoom = (roomId) => {
             currentRoomId = roomId;
-            isFinalizing = false; // フラグリセット
+            isFinalizing = false;
             unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
+                // 相手切断・削除時の処理
                 if(!docSnap.exists()) {
                     localStorage.removeItem('current_room_id');
-                    alert("対戦相手が退出したか、部屋が解散されました。\nタイトルへ戻ります。");
+                    alert("通信エラーが発生しました。\n(相手の通信切断、または退出)");
                     location.reload();
                     return;
                 }
@@ -483,26 +539,20 @@
                 
                 currentMatchData = { me, opponent, songs: data.songs, isP1 };
 
-                // 状態判定
                 if (me.result && opponent.result) {
-                    // 両者提出済み → 判定
                     if (!isFinalizing) {
                         isFinalizing = true;
                         checkAndFinalize(data.player1.result, data.player2.result, isP1);
                     }
                 } else if (me.result && !opponent.result) {
-                    // 自分だけ提出 → 待機
                     if (!document.getElementById('waiting-result-screen').classList.contains('active')) {
                         switchScreen('waiting-result-screen');
                     }
                 } else {
-                    // まだ提出していない（またはリセット後） → 申告画面
                     const isGaming = document.getElementById('reveal-screen').classList.contains('active') ||
                                      document.getElementById('report-screen').classList.contains('active');
                     
-                    // 自分が待機画面にいるのにここに来た＝リセットされたということ
                     if (document.getElementById('waiting-result-screen').classList.contains('active')) {
-                        // 強制的に申告画面へ
                         goToReportScreen();
                     } else if (!isGaming) {
                         startReveal(opponent, data.songs);
@@ -552,7 +602,7 @@
             closeModal('confirm-modal');
             switchScreen('waiting-result-screen');
             const field = currentMatchData.isP1 ? "player1.result" : "player2.result";
-            isFinalizing = false; // 送信時はフラグを戻しておく
+            isFinalizing = false; 
             try {
                 await updateDoc(doc(db, "rooms", currentRoomId), { [field]: selectedResult });
             } catch(e) { console.error(e); switchScreen('report-screen'); }
@@ -562,7 +612,6 @@
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
             let valid = false;
-            // 勝ち-負け、負け-勝ち、引分-引分 なら成立
             if ((myRes === 'WIN' && oppRes === 'LOSE') ||
                 (myRes === 'LOSE' && oppRes === 'WIN') ||
                 (myRes === 'DRAW' && oppRes === 'DRAW')) {
@@ -583,23 +632,15 @@
                 } catch (e) {}
                 showFinalResult(myRes, diff, newRate);
             } else {
-                // 不一致
-                isFinalizing = false; // 再チェック可能にする
+                isFinalizing = false;
                 document.getElementById('error-modal').style.display = 'flex';
             }
         };
 
-        // ★★★ 再申告時の修正 ★★★
         window.retryReport = async () => {
             document.getElementById('error-modal').style.display = 'none';
-            
-            // 1. DB上の自分の結果を null に戻す
             const field = currentMatchData.isP1 ? "player1.result" : "player2.result";
-            try {
-                await updateDoc(doc(db, "rooms", currentRoomId), { [field]: null });
-            } catch(e) { console.error(e); }
-
-            // 2. 画面を申告画面に戻す
+            try { await updateDoc(doc(db, "rooms", currentRoomId), { [field]: null }); } catch(e){}
             goToReportScreen();
         };
 
@@ -622,6 +663,22 @@
             setTimeout(() => diffEl.classList.add('show'), 500);
         };
 
+        // --- 退出ロジック ---
+        window.tryExitRoom = () => {
+            document.getElementById('exit-confirm-modal-1').style.display = 'flex';
+        };
+        window.showExitConfirm2 = () => {
+            document.getElementById('exit-confirm-modal-1').style.display = 'none';
+            document.getElementById('exit-confirm-modal-2').style.display = 'flex';
+        };
+        window.forceExitRoom = async () => {
+            if (currentRoomId) {
+                try { await deleteDoc(doc(db, "rooms", currentRoomId)); } catch(e){}
+            }
+            localStorage.removeItem('current_room_id');
+            location.reload();
+        };
+
         window.returnToTitle = async () => {
             if (currentRoomId) {
                 try { await deleteDoc(doc(db, "rooms", currentRoomId)); } catch(e){}
@@ -631,6 +688,7 @@
         };
 
         window.cancelMatching = async () => {
+            if(matchTimer) clearTimeout(matchTimer); // タイマー解除
             localStorage.removeItem('current_room_id');
             if(waitingDocId) await deleteDoc(doc(db, "waiting_room", waitingDocId));
             switchScreen('title-screen');
