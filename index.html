@@ -3,1009 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>太鼓レーティングマッチ</title>
+    <title>太鼓レーティングマッチ（診断モード）</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        /* --- 基本リセット --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: 'M PLUS Rounded 1c', "Hiragino Kaku Gothic ProN", sans-serif;
-            background-color: #fce4d6;
-            background-image: radial-gradient(#ffccbc 10%, transparent 10%);
-            background-size: 20px 20px;
-            color: #333;
-            overflow-y: auto;
-            min-height: 100vh;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        /* --- メインコンテナ --- */
-        .game-container {
-            background: #fff;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-            margin: 0 auto;
-            height: auto; 
-            z-index: 10;
-        }
-
-        .game-container.pc-mode {
-            width: 100%;
-            max-width: 500px;
-            min-height: 800px;
-            margin-top: 40px;
-            margin-bottom: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border: 4px solid #ff5722;
-        }
-
-        .game-container.mobile-mode {
-            width: 100%;
-            min-height: 100vh;
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-        }
-
-        /* --- 共通パーツ --- */
-        h1, h2, h3 { font-weight: 900; }
-        .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
-        .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; }
-        
-        /* 注意書きボックス */
-        .note-box {
-            background: #fff3e0;
-            border: 1px solid #ffe0b2;
-            color: #ef6c00;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            text-align: left;
-            margin-bottom: 20px;
-            line-height: 1.4;
-            user-select: text;
-            -webkit-user-select: text;
-        }
-
-        button { font-family: inherit; outline: none; }
-        .btn { 
-            border: none; padding: 12px; border-radius: 10px; 
-            cursor: pointer; transition: 0.1s; width: 100%; 
-            font-weight: bold; color: white; margin-bottom: 10px; 
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1); position: relative; top: 0;
-            touch-action: manipulation;
-        }
-        .btn:active { top: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
-        .btn-orange { background: #ff5722; }
-        .btn-blue { background: #2196f3; }
-        .btn-green { background: #4caf50; }
-        .btn-gray { background: #757575; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: sans-serif; background: #fce4d6; text-align: center; color: #333; padding: 20px; }
+        .btn { padding: 15px; width: 100%; margin: 10px 0; background: #333; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; }
         .btn-red { background: #d32f2f; }
-        .btn-x-share { background: #000; margin-top: 5px; }
-        
-        .view-toggle-box { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
-        .view-btn { background: transparent; border: 2px solid #aaa; color: #555; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 0 5px; touch-action: manipulation; }
-        .view-btn.active { background: #555; color: white; border-color: #555; }
-
-        .login-btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-google { background: #db4437; }
-        .btn-email { background: #607d8b; }
-        
-        .profile-bar {
-            background: #333; color: white; padding: 10px 15px; border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; box-shadow: 0 4px 0 #000;
-        }
-        .profile-name { font-size: 0.9rem; text-align: left; }
-        .profile-rate { color: #ffd700; font-size: 1.1rem; }
-        .settings-icon { cursor: pointer; font-size: 1.2rem; }
-
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .menu-btn { height: 80px; font-size: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        
-        .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        .rank-table th { background: #ffccbc; padding: 8px; color: #d84315; }
-        .rank-table td { border-bottom: 1px solid #eee; padding: 8px; }
-        .rank-1 { color: #d4af37; font-weight: bold; font-size: 1.1rem; }
-        .rank-2 { color: #a0a0a0; font-weight: bold; }
-        .rank-3 { color: #cd7f32; font-weight: bold; }
-
-        .screen { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; }
-        .screen.active { display: flex; }
-        .center-content { justify-content: center; }
-
-        .scrollable-content { width: 100%; overflow-y: auto; flex: 1; margin-bottom: 20px; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s; }
-        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        .input-field { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; user-select: text; -webkit-user-select: text;}
-        .input-label { display: block; text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: #555; }
-        .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff5722; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .song-list-box { text-align: left; margin: 10px 0; padding-left: 20px; font-weight: bold; color: #555; font-size: 0.9rem;}
-        .song-list-item { margin-bottom: 5px; }
-        
-        /* 連絡用表示スタイル (改修) */
-        .instruction-box { 
-            background: #e3f2fd; border: 2px solid #2196f3; padding: 15px; border-radius: 10px; 
-            font-size: 0.9rem; color: #0d47a1; margin-bottom: 15px; text-align: left; 
-            line-height: 1.6;
-            user-select: text; -webkit-user-select: text;
-        }
-        .role-badge {
-            display: inline-block; padding: 5px 10px; border-radius: 5px; color: white; font-weight: bold; margin-bottom: 8px;
-        }
-        .role-host { background: #e91e63; } /* 赤 */
-        .role-guest { background: #2196f3; } /* 青 */
-
-        /* --- 豪華演出用スタイル --- */
-        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
-        .result-container { margin: 20px 0; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.9); box-shadow: 0 0 30px rgba(255, 87, 34, 0.2); animation: popIn 0.5s; }
-        .result-text-win { font-size: 4rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px #ffeb3b, 2px 2px 0px #f57f17; animation: pulse 1s infinite alternate; margin: 0; line-height: 1; }
-        .result-text-lose { font-size: 3rem; color: #5c6bc0; text-shadow: 2px 2px 0px #3949ab; animation: shake 0.5s; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateX(0); } }
-        .rate-box { background: #222; color: #fff; padding: 15px 30px; border-radius: 10px; display: inline-block; margin-top: 20px; box-shadow: inset 0 0 10px #000; position: relative; }
-        .rate-value { font-size: 2.5rem; font-weight: 900; font-variant-numeric: tabular-nums; color: #ffd700; }
-        .rate-diff { font-size: 1.2rem; position: absolute; top: -15px; right: -10px; background: #ff5722; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold; opacity: 0; transition: all 0.5s ease 1s; transform: translateY(10px); }
-        .rate-diff.show { opacity: 1; transform: translateY(0); }
-        .rate-diff.plus { background: #e91e63; }
-        .rate-diff.minus { background: #2196f3; }
-
+        .log-box { text-align: left; background: #fff; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; height: 150px; overflow-y: scroll; font-size: 0.8rem; font-family: monospace; }
     </style>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            alert("【エラー発生】\n" + msg + "\n行: " + line);
+            document.getElementById('debug-log').innerHTML += `<p style="color:red;">ERROR: ${msg} (Line:${line})</p>`;
+        };
+        console.log = (function(old_function){
+            return function(text){
+                old_function(text);
+                const box = document.getElementById('debug-log');
+                if(box) box.innerHTML += `<p>${text}</p>`;
+            };
+        }(console.log));
+    </script>
 </head>
 <body>
 
-    <canvas id="confetti-canvas"></canvas>
+    <h1>診断・修復モード</h1>
+    <p>起動しない原因を特定します。</p>
 
-    <div id="main-container" class="game-container mobile-mode">
-        
-        <div id="login-screen" class="screen active center-content">
-            <h1 class="title-logo">DON-DER MATCH</h1>
-            <p class="sub-title">ログインして対戦を始めよう</p>
-            
-            <div class="note-box">
-                <strong>【推奨】</strong><br>
-                対戦時のやり取りで通知が増える可能性があるため、<br>通知欄を荒らしたくない場合は<strong>このサイト専用のXアカウント</strong>を用意することをおすすめします。
-            </div>
+    <div id="debug-log" class="log-box">ログ待機中...</div>
 
-            <div class="login-btn-group" style="width: 100%;">
-                <button id="btn-login-google" class="btn btn-google">Googleでログイン</button>
-                <div style="display:flex; gap:5px;">
-                    <input type="email" id="email-input" class="input-field" placeholder="メールアドレス" style="margin:0;">
-                    <input type="password" id="pass-input" class="input-field" placeholder="パスワード" style="margin:0;">
-                </div>
-                <div style="display:flex; gap:5px;">
-                    <button id="btn-login-email" class="btn btn-email">登録/ログイン</button>
-                </div>
-                <button id="btn-login-anon" class="btn btn-gray">匿名で始める</button>
-            </div>
-            <div class="view-toggle-box">
-                <p style="font-size:0.8rem; margin-bottom:10px;">表示モード切り替え</p>
-                <button id="btn-mobile" class="view-btn active" onclick="setViewMode('mobile')">スマホ版</button>
-                <button id="btn-pc" class="view-btn" onclick="setViewMode('pc')">PC版</button>
-            </div>
-        </div>
-
-        <div id="title-screen" class="screen">
-            <h1 class="title-logo">DON-DER MATCH</h1>
-            <div class="profile-bar">
-                <div>
-                    <div class="profile-name" id="display-name">Loading...</div>
-                    <div style="font-size:0.8rem; opacity:0.8;" id="display-xid">@未設定</div>
-                </div>
-                <div style="text-align:right;">
-                    <div class="profile-rate">Rate: <span id="display-rate">---</span></div>
-                    <span class="settings-icon" onclick="openProfileModal()">⚙️設定</span>
-                </div>
-            </div>
-            <div class="menu-grid">
-                <button class="btn btn-orange menu-btn" onclick="openRanking()"><span>🏆</span>ランキング</button>
-                <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')"><span>📜</span>対戦履歴</button>
-            </div>
-            <p style="font-weight:bold; margin-bottom:10px;">対戦難易度を選択</p>
-            <button id="btn-mode-normal" class="btn btn-green">難易度 F ～ A+</button>
-            <button id="btn-mode-hard" class="btn btn-orange">難易度 S ～ SS</button>
-        </div>
-
-        <div id="matching-screen" class="screen center-content">
-            <div class="loader"></div>
-            <h3>対戦相手を探しています...</h3>
-            <p id="match-status" style="color:#ff5722; margin-top:10px; font-weight:bold;"></p>
-            <p style="font-size:0.8rem; color:#777; margin-top:5px;">※約60秒経過すると自動キャンセルされます</p>
-            <button id="btn-cancel-match" class="btn btn-gray" style="margin-top:30px; width:50%;">キャンセル</button>
-        </div>
-
-        <div id="reveal-screen" class="screen" style="padding-top:20px;">
-            <h2 style="color:#ff5722;">MATCH START!</h2>
-            <p>VS 対戦相手</p>
-            <div style="font-size:1.5rem; font-weight:bold; color:#1da1f2; border:2px solid #1da1f2; padding:10px; border-radius:10px; margin:10px 0;">
-                <span id="opponent-x-display"></span>
-            </div>
-            <div id="song-reveal-container" style="width:100%; margin-top:10px; flex:1;"></div>
-            <button id="goto-report-btn" class="btn btn-green" style="display:none; margin-top:20px; margin-bottom:20px;" onclick="goToReportScreen()">結果を報告する</button>
-        </div>
-
-        <div id="report-screen" class="screen center-content" style="justify-content: flex-start; padding-top: 20px;">
-            <h2>結果報告</h2>
-            <div class="scrollable-content">
-                
-                <div id="instruction-area" class="instruction-box">
-                    </div>
-
-                <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left;">
-                    <p><strong>相手:</strong> <span id="rep-opp-name" style="font-weight:bold;"></span></p>
-                    <p><strong>X ID:</strong> <span id="rep-opp-xid" style="color:#1da1f2; font-weight:bold;"></span></p>
-                    <hr style="margin:10px 0; border:none; border-top:1px solid #ddd;">
-                    <p><strong>▼ 課題曲リスト</strong></p>
-                    <div id="rep-song-list" class="song-list-box"></div>
-                </div>
-            </div>
-
-            <p style="font-weight:bold; margin-bottom:10px;">あなたの勝敗は？</p>
-            <div style="display:flex; gap:10px; width:100%; margin-bottom:20px;">
-                <button class="btn" style="background:#e91e63;" onclick="confirmResult('WIN')">勝ち</button>
-                <button class="btn" style="background:#9c27b0;" onclick="confirmResult('DRAW')">引分</button>
-                <button class="btn" style="background:#2196f3;" onclick="confirmResult('LOSE')">負け</button>
-            </div>
-            
-            <button class="btn btn-red" style="margin-bottom:20px;" onclick="tryExitRoom()">退出する (無効試合)</button>
-        </div>
-
-        <div id="waiting-result-screen" class="screen center-content">
-            <div class="loader"></div>
-            <h3>確認中...</h3>
-            <p>相手の入力を待っています</p>
-            <p style="font-size:0.8rem; color:red; margin-top:20px;">※13分以上応答がない場合、<br>自動でエラーとなり終了します。</p>
-            
-            <button class="btn btn-red" style="margin-top:30px; width: auto; padding-left: 30px; padding-right: 30px;" onclick="tryExitRoom()">退出する (無効試合)</button>
-        </div>
-
-        <div id="final-result-screen" class="screen center-content">
-            <div class="result-container">
-                <h1 id="final-title">WIN!</h1>
-                <p id="final-message" style="margin-bottom:15px; font-weight:bold;"></p>
-                <div class="rate-box">
-                    <div class="rate-value" id="anim-rate-val">1500</div>
-                    <div class="rate-diff" id="anim-rate-diff">+20</div>
-                </div>
-            </div>
-            <button id="btn-return-title" class="btn btn-gray" style="margin-top:30px;">タイトルへ戻る</button>
-        </div>
-    </div>
-
-    <div id="profile-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>プロフィール設定</h3>
-            <div style="margin-top:20px;">
-                <label class="input-label">プレイヤー名</label>
-                <input type="text" id="edit-name" class="input-field" placeholder="例: どんちゃん">
-                <label class="input-label">X(Twitter) ID</label>
-                <p style="font-size:0.7rem; color:#e91e63; text-align:left;">※対戦には先頭に @ が必要です</p>
-                <p style="font-size:0.7rem; color:#777; text-align:left;">※通知が多いため専用アカウントを推奨</p>
-                <input type="text" id="edit-xid" class="input-field" placeholder="例: @taiko_master">
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-gray" onclick="closeModal('profile-modal')">キャンセル</button>
-                <button class="btn btn-orange" onclick="saveProfile()">保存</button>
-            </div>
-            <button class="btn btn-red" style="margin-top:20px;" onclick="confirmLogout()">ログアウト</button>
-        </div>
-    </div>
-
-    <div id="ranking-modal" class="modal-overlay">
-        <div class="modal-box" style="max-width:450px;">
-            <h3>ランキング</h3>
-            <div style="max-height:300px; overflow-y:auto;">
-                <table class="rank-table">
-                    <thead><tr><th>順位</th><th>名前</th><th>レート</th></tr></thead>
-                    <tbody id="ranking-list"></tbody>
-                </table>
-            </div>
-            <button class="btn btn-gray" style="margin-top:20px;" onclick="closeModal('ranking-modal')">閉じる</button>
-        </div>
-    </div>
-
-    <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>確認</h3>
-            <p style="margin:15px 0;">結果は「<span id="modal-selection" style="font-weight:bold; color:#ff5722;"></span>」で<br>間違いないですか？</p>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-gray" onclick="closeModal('confirm-modal')">戻る</button>
-                <button class="btn btn-orange" onclick="submitResult()">決定</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="error-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="color:#d32f2f;">結果不一致</h3>
-            <p>申告が食い違っています。<br>もう一度入力してください。</p>
-            <button class="btn btn-orange" onclick="retryReport()">再入力</button>
-        </div>
-    </div>
-
-    <div id="exit-confirm-modal-1" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="color:#d32f2f;">警告</h3>
-            <p>退出すると無効試合になります。<br>本当に退出しますか？</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn btn-gray" onclick="closeModal('exit-confirm-modal-1')">やめる</button>
-                <button class="btn btn-red" onclick="showExitConfirm2()">はい</button>
-            </div>
-        </div>
-    </div>
-    <div id="exit-confirm-modal-2" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="color:#d32f2f;">最終確認</h3>
-            <p>本当に退出してよろしいですか？<br>(この操作は取り消せません)</p>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn btn-gray" onclick="closeModal('exit-confirm-modal-2')">やめる</button>
-                <button class="btn btn-red" onclick="forceExitRoom()">退出する</button>
-            </div>
-        </div>
-    </div>
-
+    <button class="btn btn-red" onclick="emergencyReset()">⚠️ アプリを初期化して修復</button>
+    
+    <hr>
+    
+    <p>↓この下に通常画面が表示されます↓</p>
+    <div id="app-content"></div>
 
     <script type="module">
+        console.log("1. スクリプト開始");
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ★★★ APIキーを貼り付けてください ★★★
+        console.log("2. モジュール読み込み完了");
+
         const firebaseConfig = {
-  apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
-  authDomain: "taikorating.firebaseapp.com",
-  projectId: "taikorating",
-  storageBucket: "taikorating.firebasestorage.app",
-  messagingSenderId: "657970223088",
-  appId: "1:657970223088:web:509230d6b20d78cbf3af35",
-  measurementId: "G-PJXEXL5E9M"
-};
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let userData = { displayName: "名無し", xId: "未設定", rate: 1500 }; 
-        let waitingDocId = null;
-        let currentRoomId = null;
-        let unsubscribeRoom = null;
-        let currentMatchData = {};
-        let selectedResult = null;
-        let isFinalizing = false;
-        let matchTimer = null;
-        let heartbeatTimer = null;
-        let wakeLock = null; 
-
-        // ★★★ 別ファイルから曲リストを読み込む場合はここに import 文を書く ★★★
-        const songDatabase = {
-            曲データ
-
-'normal': [
-                "アムピト◇リーテー","ouroboros -twin stroke of the end-","χ談","カラフル","彼は誰時の誘惑（裏）","ココドコ？多分ドッカ島！（裏）","コネクトカラーズ","GORI × GORI × SafaRI（裏）","万戈イム－一ノ十","青天の黎明","Central Dogma Pt.2","Taiko Drum Monster（表）","DEBSTEP!","Dreadnought（裏）","Don't Stop the Game","HARDCOREノ心得","幕末維新譚","†バチ!ムチ!?マッスルキングダム†","Hello, Worldooon!!（裏）","パン vs ごはん！ 大決戦！（裏）[達人]","ピッチフェイダ（裏）","for Q（裏）","プチポチ","Behemoth","まるくてはやくてすさまじいリズム","モノクロームユートピア","ラパスの虹（裏）","赤と白薔薇の魔女","あめふりのロンド（裏）","ON SAY GO SAY（裏）","カルメン組曲 一番終曲（裏）","森羅万象[開幕達人]","双竜ノ乱（裏）【双打】","デッド・オア・ダイ","23時54分、陽の旅路へのプレリュード（表）","にゃーにゃーにゃー","メタナイトの逆襲メドレー（裏）","8OROCHI（裏）","哀 want U","蒼鷺之火（裏）","或ル不和","VERTeX","美しく忙しきドナウ（裏）","ウルトラマンX（裏）","郢曲／暁闇","Agent Hustle & Dr. Hassle（表）","GERBERA","雲間を游ぐ","The Future of the 太鼓ドラム（表）","SAVAGE DELIGHT","〆ドレー2000","重金属フューギティブ","Xevel","其方、激昂","超絶技巧系少女","テトラリュトモスフォビア","天泣の律","転生〈TENSEI〉-喜与志が待つ強者-（裏）","Toon Town's Toys' Tune","ナイトメア・サバイバー（裏）","BATTLE NO.1[達人]","Honey Heartbeat ～10 Stars Mix～（裏）","Parousia","パン vs ごはん！ 大決戦！（表）[達人]","vs.VIGVANGS（表）","Mood Swing（裏）","もぺもぺ","螺旋周回軌道（裏）","LECIEL GLISSANDO","LUNATiC CiRCUiT","冷凍庫CJ ～嗚呼面太鼓ブラザーズ～","ARMAGEΔDON","Unwelcome School (MRM REMIX)（裏）","Irregular Clock（裏）","EterNal Ring","懐中庭園を持つ少女","絡繰廻廊","Caribbean Knight","GIGALODOON（裏）","鼓立あおはる学園校歌","束ね糸","チルノのパーフェクトさんすう教室➈周年バージョン（裏）","儚姫は原初に舞う（裏）","ひよこ鑑定士さん","FLOWER（裏）","BLAZING VORTEX（裏）","Player's High","ANiMA","Altale（裏）","Aleph-0","UNDEAD HEART(怒りのWarriors)","イオシス秋の爆食祭2024","怒槌","Valsqotch","OK I’m blue rat","KAGEKIYO（裏）","CUT! into the FUTURE（表）","極圏","沓の子を打つ（裏）","クラポルポルスカ","Groovy Duel","Goldfish City","Got more raves?（裏）","秋竜 ～Shiuryu～（裏）","疾風怒濤（表）","承認欲Q","Singularity Game","晨星ト鵺","SUPERNOVA（裏）","Stick Trick ShowTime!!","閃光天舞","SoulStone -闇喰イサァカス団-","SORA-VII シグナスウォール","月読命","電脳幻夜の星言詠","トイマチック☆パレード!!","Doom Noiz","Hello, Mr.JOKER","人のお金で焼肉を食したい！（裏）","FUJIN Rumble","Help me, さいたま2000!!","またさいたま2000","三瀬川乱舞（裏）","メカデス。（裏）","めためた☆ゆにば～すっ！（裏）","モノクロボイス（表）","Re：End of a Dream（裏）","竜と黒炎の姫君（裏）","練習曲Op.10-4（裏）","Rotter Tarmination（裏）","六本の薔薇と采の歌（裏）","What's in the box?","あなたとトゥラッタッタ♪（裏）","Aragami","案山子姫 -Princess Scarecrow-（裏）","Garakuta Doll Play（裏）","カラフルボイス（裏）","Calculator","気焔万丈神楽","Kill My Fortune（裏）","ゲゲゲの鬼太郎（裏）","刻竜 ～Kokuryu～（表）","神竜 ～Shinryu～（表）","Scarlet Lance","星河一天","憎悪と醜悪の花束（表）","Destr0yer（裏）","ドドドドドンだフル！（裏）","はたラク2000","Vixtory（表）","秘ナルメジェドノ悲ナル憂鬱","メタルホーク BGM1","memoria ficta","燎原ノ舞","愛と浄罪の森","アサガオ","Abyss of hell（裏）","天照","Ignis Danse","Illusion Flare","うちゅうひこうし冒険譚","ex寅 Trap!!","Evidence of evil","カラ鞠の花","ギガンティックO.T.N（裏）","きゅうくらりん（裏）","共奏鼓祭（裏）","Chronomia","弧","ゴーストマスク","ゴッドソング（裏）","God Ray","鼓舞曲「閻魔」","潮騒205号SSS線","紫煌ノ乱","蛇鉄","須佐之男","Spectral Rider","Soulway（達人）","D's Adventure Note","D絶対！SAMURAIインザレイン（裏）","Telecastic fake show","てんぢく2000","弩蚊怒夏","とける（表）","Dogbite","Doppelgangers（裏）","白鳥の湖～still a duckling～（裏）","ハンロック","平等院鳳凰ドン vs 鳥獣戯カッ（裏）","ヘイラ（裏）","ヘイラ（にじさんじVer.）（裏）","ペットショップ大戦","MagiCatz","ミュージック・リボルバー（裏）","YOU're your HERO","六華の舞","wonderful ROUTINE","あの日出会えたキセキ","アンリミテッドゲームズ（表）","ギミチョコ!!（裏）","Gloria","濃紅","濃紅（にじさんじVer.）","ココロボ","Central Dogma Pt.1（表）","夏祭り / ジッタリン・ジン（裏）","Purple Rose Fusion","みんなのうた","MEGALOVANIA（裏）","4+1のそれぞれの未来","Lightning Boys（表）","アキバ20XX","Aloft in the wind（裏）","イガク（裏）","頂","INSPION","ウィーアー！（裏）","waitin' for u","Angel Halo","オーバード（裏）","オーブの祈り","Oshama Scramble!（裏）","GIGALODOON（表）","きたさいたま2000","キャラメル・ジャンキヰ","Surf Zapping","Silent Jealousy（裏）","セイクリッド ルイン（裏）","零の交響曲（裏）","そつおめしき2ばん","十露盤2000","Diving Drive","ダンガンノーツ（表）","天下統一録","ドドンガド～ン（裏）","No Gravity","ノるどん2000","VICTORIA","ピコピコ ルイン（裏）","VIVIVIVID","FREEDOM DiVE↓","Venomous（裏）","星屑ストラック（表）","8OROCHI（表）","YOAKE","夜桜謝肉祭（裏）","ラヴ♡スパイス♡ライクユー!!!","Libera Ray","詩謳兎揺蕩兎","Extreme End","Emma（裏）[普通]","Garakuta Doll Play（裏）【双打】","ゴーゴー・キッチン（裏）","最終鬼畜妹フランドール・S","タイコタイム（裏）","乱数調整のリバースシンデレラ（裏）","R.I.","蒼の旋律（裏）","朱の旋律","EkiBEN2000","Kamikaze Remix","Calamity Fortune（表）","キューティー☆デモニック☆魔人エモ!!","【双打】紅（裏）","さちさちにしてあげる♪（裏）","スーパーD＆D ～完全にリードしてアイマイミー～","SUPERNOVA（表）","SstTAarR*","Soulway（開幕普通）","タイコロール","タベルナ2000","儚姫は原初に舞う（表）","BATTLE NO.1[玄人]","ヒバナ（裏）","Blessed Bouquet Buskers","よーいドン！","そつおめしき","初音ミクの激唱（表）","初音ミクの激唱（裏）","パン vs ごはん！ 大決戦！（表）[普通]","パン vs ごはん！ 大決戦！（裏）[普通]","Black Rose Apostle（表）","Black Rose Apostle（裏）","マツヨイナイトバグ（裏）","X-DAY2000","KAGEKIYO（裏）【双打】","Clotho クロートー","旋風ノ舞【天】（表）","旋風ノ舞【天】（裏）","チルノのパーフェクトさんすう教室（裏）","ネクロファンタジア ～ Arr.Demetori","拝啓ドッペルゲンガー","BATTLE NO.1[普通]","mint tears"
-            ],
-            'hard': [
-                "Infinite Rebellion","彁（裏）","CRUXNAUT","The Future of the 太鼓ドラム（裏）","神竜 ～Shinryu～（裏）","憎悪と醜悪の花束（裏）","ダーク・エクス・マキナ♡","第六天魔王（表）","第六天魔王（裏）","ダンガンノーツ（裏）","Destination 2F29","ドンカマ2000","23時54分、陽の旅路へのプレリュード（裏）","Vixtory（裏）","vs.VIGVANGS（裏）","poxei♦DOON","幽玄ノ乱","!!!カオスタイム!!!","†††カオスタイム the DARK†††","Calamity Fortune（裏）","業 -善なる神とこの世の悪について-（裏）","最果の魔法使い（裏）","siren's eye","疾風怒濤（裏）","Central Dogma Pt.1（裏）","魑魅魍魎","とける（裏）","トロいか2000","ラ・モレーナ・クモナイ（裏）","アンリミテッドゲームズ（裏）","Emma（裏）[達人]","CUT! into the FUTURE（裏）","刻竜 ～Kokuryu～（裏）","!!!チルノのパーフェクトさんすうタイム!!!","まださいたま2000","4+1のそれぞれの未来（裏）[達人]","4+1のそれぞれの未来（裏）[玄人]","4+1のそれぞれの未来（裏）[普通]","オペレート・ミー（裏）","彁（表）","仮想現実のテレスコープ（裏）","Coquette","Synthesis.（裏）","スーハー2000","続・〆ドレー2000","そして勇者は眠りにつく（裏）","Taiko Drum Monster（裏）","Challengers","≠ＭＭ","Hurtling Boys","初音ミクの消失‐劇場版‐（裏）","星屑ストラック（裏）","Lightning Boys（裏）","Lδchesis（裏）","λ7708","わら得る2000","Xa（裏）","狂瀾怒濤（裏）","氷竜～Kooryu～（裏）","Genesis Ray（裏）","双竜ノ乱","たいこの2000","チャーリーダッシュ！","Nosferatu（裏）","POLARiSNAUT","モノクロボイス（裏）","UFO Swingin'"
-            ]
+          apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
+          authDomain: "taikorating.firebaseapp.com",
+          projectId: "taikorating",
+          storageBucket: "taikorating.firebasestorage.app",
+          messagingSenderId: "657970223088",
+          appId: "1:657970223088:web:509230d6b20d78cbf3af35",
+          measurementId: "G-PJXEXL5E9M"
         };
 
-        const requestWakeLock = async () => {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    wakeLock.addEventListener('release', () => {});
-                }
-            } catch (err) { console.error(err); }
-        };
-        document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') await requestWakeLock();
-        });
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            console.log("3. Firebase初期化成功");
 
-        const handleUnload = () => {
-            if (currentRoomId && currentUser) deleteDoc(doc(db, "rooms", currentRoomId)).catch(()=>{});
-            if (waitingDocId) deleteDoc(doc(db, "waiting_room", waitingDocId)).catch(()=>{});
-        };
-        window.addEventListener('beforeunload', handleUnload);
-
-        window.setViewMode = (mode) => {
-            const container = document.getElementById('main-container');
-            const btnMobile = document.getElementById('btn-mobile');
-            const btnPc = document.getElementById('btn-pc');
-            if (mode === 'pc') {
-                container.classList.remove('mobile-mode'); container.classList.add('pc-mode');
-                btnMobile.classList.remove('active'); btnPc.classList.add('active');
-                localStorage.setItem('view_mode', 'pc');
-            } else {
-                container.classList.remove('pc-mode'); container.classList.add('mobile-mode');
-                btnMobile.classList.add('active'); btnPc.classList.remove('active');
-                localStorage.setItem('view_mode', 'mobile');
-            }
-        };
-        const savedMode = localStorage.getItem('view_mode');
-        if (savedMode) window.setViewMode(savedMode);
-        else window.setViewMode('mobile');
-
-        // --- イベントリスナー設定 ---
-        const bindBtn = (id, func) => {
-            const el = document.getElementById(id);
-            if(el) el.addEventListener('click', func);
-        };
-
-        // ログイン系 (Popup)
-        bindBtn('btn-login-google', () => {
-            const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            signInWithPopup(auth, provider)
-            .catch(e => alert("ログインエラー:\n" + e.message));
-        });
-        
-        bindBtn('btn-login-email', async () => {
-            const email = document.getElementById('email-input').value;
-            const pass = document.getElementById('pass-input').value;
-            if(!email || !pass) return alert("入力してください");
-            try { await signInWithEmailAndPassword(auth, email, pass); }
-            catch(e) { try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e2) { alert(e2.message); } }
-        });
-        bindBtn('btn-login-anon', () => signInAnonymously(auth).catch(e => alert(e.message)));
-
-        // モード選択・キャンセル
-        bindBtn('btn-mode-normal', () => window.tryStartMatching('normal'));
-        bindBtn('btn-mode-hard', () => window.tryStartMatching('hard'));
-        bindBtn('btn-cancel-match', () => window.cancelMatching());
-        bindBtn('btn-return-title', () => window.returnToTitle());
-
-        // --- ログアウト処理 ---
-        window.confirmLogout = async () => {
-            if (confirm("本当にログアウトしますか？")) {
-                await signOut(auth);
-                location.reload();
-            }
-        };
-
-        // ★リダイレクトログインの結果を確認
-        getRedirectResult(auth).catch((error) => {
-            console.error("Redirect login error:", error);
-            if (error.code !== 'auth/popup-closed-by-user') {
-                alert("ログインに失敗しました。\n" + error.message);
-            }
-        });
-
-        onAuthStateChanged(auth, async (user) => {
-            if(user) {
-                currentUser = user;
-                try {
-                    const userRef = doc(db, "users", user.uid);
-                    const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) {
-                        userData = userSnap.data();
-                        
-                        // BANチェック
-                        if (userData.isBanned) {
-                            alert("このアカウントは凍結されています。");
-                            await signOut(auth);
-                            location.reload();
-                            return;
-                        }
-
-                        if(userData.rate === undefined) userData.rate = 1500;
-                    } else {
-                        userData = { displayName: "名無しどん", xId: "未設定", rate: 1500, createdAt: new Date() };
-                        await setDoc(userRef, userData);
+            onAuthStateChanged(auth, async (user) => {
+                console.log("4. 認証状態確認: " + (user ? "ログイン中" : "未ログイン"));
+                if (user) {
+                    console.log("UID: " + user.uid);
+                    try {
+                        console.log("5. データベース接続テスト...");
+                        const userRef = doc(db, "users", user.uid);
+                        const snap = await getDoc(userRef);
+                        console.log("6. データ取得成功: " + (snap.exists() ? "あり" : "なし(新規)"));
+                        alert("診断OK！\nデータ取得に成功しました。\nこれで「初期化」ボタンを押してから、元のコードに戻してください。");
+                    } catch (e) {
+                        console.error(e);
+                        alert("データベースエラー:\n" + e.message + "\n\nAPIキーの制限設定か、通信環境を確認してください。");
                     }
-                    updateProfileUI();
-                    switchScreen('title-screen');
-                    const savedRoomId = localStorage.getItem('current_room_id');
-                    if (savedRoomId) checkRestore(savedRoomId);
-                } catch(e) { console.error(e); switchScreen('title-screen'); }
-            }
-        });
-
-        const updateProfileUI = () => {
-            document.getElementById('display-name').innerText = userData.displayName;
-            document.getElementById('display-xid').innerText = userData.xId;
-            document.getElementById('display-rate').innerText = userData.rate;
-            document.getElementById('edit-name').value = userData.displayName;
-            document.getElementById('edit-xid').value = userData.xId;
-        };
-
-        window.openProfileModal = () => document.getElementById('profile-modal').style.display = 'flex';
-        window.saveProfile = async () => {
-            const newName = document.getElementById('edit-name').value;
-            const newXid = document.getElementById('edit-xid').value;
-            if(!newName) return alert("名前を入力してください");
-            await setDoc(doc(db, "users", currentUser.uid), { displayName: newName, xId: newXid || "未設定" }, { merge: true });
-            userData.displayName = newName; userData.xId = newXid || "未設定";
-            updateProfileUI(); closeModal('profile-modal');
-        };
-
-        window.openRanking = async () => {
-            document.getElementById('ranking-modal').style.display = 'flex';
-            const tbody = document.getElementById('ranking-list');
-            tbody.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
-            try {
-                const q = query(collection(db, "users"), orderBy("rate", "desc"), limit(10));
-                const snapshot = await getDocs(q);
-                tbody.innerHTML = "";
-                let rank = 1;
-                snapshot.forEach(doc => {
-                    const d = doc.data();
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td class="rank-${rank}">${rank}</td><td style="text-align:left;">${d.displayName || '名無し'}</td><td>${d.rate || 1500}</td>`;
-                    tbody.appendChild(tr);
-                    rank++;
-                });
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="3">読み込み失敗</td></tr>'; }
-        };
-
-        window.tryStartMatching = (mode) => {
-            if (userData.xId === "未設定" || !userData.xId.startsWith("@")) {
-                alert("【設定エラー】\nX IDを設定してください。");
-                openProfileModal(); return;
-            }
-            startMatching(mode);
-        };
-
-        const switchScreen = (id) => {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-
-        const checkRestore = async (roomId) => {
-             try {
-                 const roomSnap = await getDoc(doc(db, "rooms", roomId));
-                 if(roomSnap.exists()) {
-                     requestWakeLock();
-                     startHeartbeat(roomId);
-                     watchRoom(roomId);
-                 } else {
-                     localStorage.removeItem('current_room_id');
-                 }
-             } catch(e) { localStorage.removeItem('current_room_id'); }
-        };
-
-        const pickRandomSongs = (mode) => {
-            const list = songDatabase[mode] || [];
-            return [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
-        };
-
-        const startMatching = async (mode) => {
-            switchScreen('matching-screen');
-            document.getElementById('match-status').innerText = "対戦相手を待っています...";
-            try {
-                // 安全マージン: 60秒以上経過した古いデータを削除
-                const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(20));
-                const snap = await getDocs(q);
-                let opponentDoc = null;
-                const now = Date.now();
-
-                for (const d of snap.docs) {
-                    const data = d.data();
-                    const elapsed = data.createdAt ? (now - data.createdAt.toMillis()) : 99999;
-                    if (elapsed > 60000) { deleteDoc(doc(db, "waiting_room", d.id)).catch(()=>{}); continue; }
-                    if (elapsed > 55000) { continue; } // 安全マージン
-                    if(data.uid !== currentUser.uid) { opponentDoc = d; break; }
-                }
-
-                if(opponentDoc) {
-                    // ★ 順番変更: 先に部屋を作る！
-                    const opp = opponentDoc.data();
-                    
-                    // 8桁の数字ID生成
-                    const matchId = Math.floor(10000000 + Math.random() * 90000000).toString();
-
-                    const roomRef = await addDoc(collection(db, "rooms"), {
-                        mode: mode, songs: pickRandomSongs(mode), createdAt: new Date(),
-                        matchId: matchId,
-                        player1: { uid: opp.uid, xId: opp.xId, displayName: opp.displayName, rate: opp.rate, result: null, lastSeen: Date.now() },
-                        player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, rate: userData.rate, result: null, lastSeen: Date.now() }
-                    });
-                    
-                    // その後に削除
-                    await deleteDoc(doc(db, "waiting_room", opponentDoc.id));
-
-                    localStorage.setItem('current_room_id', roomRef.id);
-                    requestWakeLock();
-                    startHeartbeat(roomRef.id);
-                    watchRoom(roomRef.id);
                 } else {
-                    const ref = await addDoc(collection(db, "waiting_room"), {
-                        uid: currentUser.uid, mode: mode, xId: userData.xId, displayName: userData.displayName, 
-                        rate: userData.rate, createdAt: new Date()
-                    });
-                    waitingDocId = ref.id;
-                    
-                    if(matchTimer) clearTimeout(matchTimer);
-                    matchTimer = setTimeout(async () => {
-                        if(waitingDocId) {
-                            if(unsubscribeRoom) unsubscribeRoom();
-                            unsubscribeRoom = null;
-                            
-                            // ★ 念のための最終確認: 自分のIDの部屋ができていないか？
-                            const me1 = await getDocs(query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid)));
-                            if(!me1.empty) {
-                                // 部屋発見！キャンセル中止
-                                const roomDoc = me1.docs[0];
-                                waitingDocId = null; 
-                                localStorage.setItem('current_room_id', roomDoc.id);
-                                requestWakeLock();
-                                startHeartbeat(roomDoc.id);
-                                watchRoom(roomDoc.id);
-                                return;
-                            }
-
-                            try { await deleteDoc(doc(db, "waiting_room", waitingDocId)); } catch(e){}
-                            waitingDocId = null;
-                            switchScreen('title-screen');
-                            alert("【タイムアウト】\n一定時間マッチングしなかったため、\n自動キャンセルしました。");
-                        }
-                    }, 60000); // 60秒待機
-
-                    const roomQ = query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid));
-                    unsubscribeRoom = onSnapshot(roomQ, snap => {
-                        snap.docChanges().forEach(c => {
-                            if(c.type === "added") {
-                                if(matchTimer) clearTimeout(matchTimer); 
-                                waitingDocId = null; unsubscribeRoom();
-                                localStorage.setItem('current_room_id', c.doc.id);
-                                requestWakeLock();
-                                startHeartbeat(c.doc.id);
-                                watchRoom(c.doc.id);
-                            }
-                        });
-                    });
+                    alert("未ログイン状態です。\nこの画面ではログインできませんが、Firebaseへの接続は正常です。");
                 }
-            } catch(e) { console.error(e); alert("マッチングエラー:\n" + e.message); switchScreen('title-screen'); }
-        };
+            });
 
-        const startHeartbeat = (roomId) => {
-            if(heartbeatTimer) clearInterval(heartbeatTimer);
-            updateLastSeen(roomId);
-            heartbeatTimer = setInterval(() => {
-                if(!currentRoomId) return;
-                updateLastSeen(roomId);
-            }, 5000); 
-        };
-
-        const updateLastSeen = async (roomId) => {
-            if(currentMatchData.isP1 !== undefined) {
-                const field = currentMatchData.isP1 ? "player1.lastSeen" : "player2.lastSeen";
-                try { await updateDoc(doc(db, "rooms", roomId), { [field]: Date.now() }); } catch(e) {}
-            }
+        } catch (e) {
+            alert("起動エラー:\n" + e.message);
         }
 
-        const watchRoom = (roomId) => {
-            currentRoomId = roomId;
-            isFinalizing = false;
-            unsubscribeRoom = onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
-                if(!docSnap.exists()) {
-                    handleForceExit("通信エラーが発生しました。\n(相手の通信切断、または退出)");
-                    return;
-                }
-                const data = docSnap.data();
-                const isP1 = data.player1.uid === currentUser.uid;
-                const me = isP1 ? data.player1 : data.player2;
-                const opponent = isP1 ? data.player2 : data.player1;
-                
-                currentMatchData = { me, opponent, songs: data.songs, isP1, createdAt: data.createdAt, matchId: data.matchId };
-
-                // 切断検知 (780秒 = 13分)
-                const now = Date.now();
-                if (opponent.lastSeen && (now - opponent.lastSeen > 780000)) { 
-                    deleteDoc(doc(db, "rooms", roomId)).catch(()=>{});
-                    return; 
-                }
-
-                if (me.result && opponent.result) {
-                    if (!isFinalizing) {
-                        isFinalizing = true;
-                        checkAndFinalize(data.player1.result, data.player2.result, isP1);
-                    }
-                } else if (me.result && !opponent.result) {
-                    if (!document.getElementById('waiting-result-screen').classList.contains('active')) {
-                        switchScreen('waiting-result-screen');
-                    }
-                } else {
-                    const isGaming = document.getElementById('reveal-screen').classList.contains('active') ||
-                                     document.getElementById('report-screen').classList.contains('active');
-                    
-                    if (document.getElementById('waiting-result-screen').classList.contains('active')) {
-                        goToReportScreen();
-                    } else if (!isGaming) {
-                        startReveal(opponent, data.songs);
-                    }
-                }
-            });
-        };
-
-        const handleForceExit = (msg) => {
-            if(heartbeatTimer) clearInterval(heartbeatTimer);
-            if(wakeLock) wakeLock.release().then(()=> wakeLock = null).catch(()=>{});
-            localStorage.removeItem('current_room_id');
-            alert(msg);
-            location.reload();
-        };
-
-        const startReveal = async (opponent, songs) => {
-            switchScreen('reveal-screen');
-            document.getElementById('opponent-x-display').innerText = `${opponent.displayName}\n(${opponent.xId})`;
-            const con = document.getElementById('song-reveal-container');
-            con.innerHTML = "";
-            for(let i=0; i<songs.length; i++){
-                await new Promise(r=>setTimeout(r, 400));
-                const d = document.createElement('div');
-                d.style.cssText = "background:#fff3e0; border:2px solid #ff9800; padding:10px; margin:5px 0; border-radius:8px; font-weight:bold; opacity:0; transform:translateX(-10px); transition:0.3s;";
-                d.innerHTML = `<span style="background:#ff5722; color:white; padding:2px 5px; border-radius:4px; font-size:0.8rem; margin-right:5px;">${i+1}</span> ${songs[i]}`;
-                con.appendChild(d);
-                setTimeout(()=> { d.style.opacity=1; d.style.transform="translateX(0)"; }, 50);
-            }
-            document.getElementById('goto-report-btn').style.display = 'inline-block';
-        };
-
-        window.goToReportScreen = () => {
-            switchScreen('report-screen');
-            document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
-            document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
+        // --- 緊急リセット機能 ---
+        window.emergencyReset = async () => {
+            if(!confirm("ログイン情報と一時データを削除してリセットしますか？\n(レート等のデータは消えません)")) return;
             
-            // HOST/GUEST 表示分け
-            const isHost = currentMatchData.isP1; // Player1がHOST
-            const matchId = currentMatchData.matchId || "--------";
-            const instructionArea = document.getElementById('instruction-area');
+            // ローカルストレージ全消去
+            localStorage.clear();
+            sessionStorage.clear();
             
-            if (isHost) {
-                const tweetText = `@1 対戦番号${matchId}`;
-                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-                instructionArea.innerHTML = `
-                    <span class="role-badge role-host">HOST (募集)</span>
-                    <p><strong>1分以内</strong>に以下のボタンからツイートしてください。</p>
-                    <div style="margin:10px 0; font-weight:bold; color:#333; background:#fff; padding:5px; border-radius:4px;">
-                        @1 対戦番号${matchId}
-                    </div>
-                    <a href="${url}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white; margin-top:10px;">ツイートする</a>
-                    <p style="font-size:0.8rem; color:#d32f2f; margin-top:10px;">
-                        ※1〜2分待っても返信が来ない場合は、<br>一番下の「退出する」ボタンを押してください。
-                    </p>
-                `;
-            } else {
-                // IDから @ を除去
-                const cleanId = currentMatchData.opponent.xId ? currentMatchData.opponent.xId.replace('@', '') : '';
-                const profileUrl = `https://twitter.com/${cleanId}`;
-                const searchText = `@1 対戦番号${matchId}`;
-                const searchUrl = `https://twitter.com/search?q=${encodeURIComponent(searchText)}&f=live`;
-
-                instructionArea.innerHTML = `
-                    <span class="role-badge role-guest">GUEST (参加)</span>
-                    <p>相手のプロフィールに飛び、ツイートを探してください。</p>
-                    <p style="color:#d32f2f; font-weight:bold; background:#fff; padding:5px; border-radius:4px; margin:10px 0;">
-                        ⚠️必ず「返信」欄を見てください！<br>
-                        <span style="font-size:0.8rem; font-weight:normal;">(@1 ツイートは通常のポスト欄には表示されません)</span>
-                    </p>
-                    <a href="${profileUrl}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white;">相手のXプロフィールへ</a>
-                    
-                    <div style="margin-top:15px; padding:10px; background:#fff3e0; border-radius:8px; font-size:0.85rem;">
-                        <strong>どうしても見つからない場合</strong><br>
-                        以下の文言で検索してみてください。<br>
-                        <div style="font-weight:bold; margin:5px 0; user-select:all; -webkit-user-select:all;">${searchText}</div>
-                        <a href="${searchUrl}" target="_blank" style="color:#e65100; text-decoration:underline;">ここを押して検索する</a>
-                    </div>
-
-                    <div style="margin-top:15px; font-size:0.85rem; color:#555; line-height:1.4;">
-                        相手は2分以内にツイートするルールです。<br>
-                        まずは<strong>1分ほど待ってみてください！</strong>
-                    </div>
-                    <p style="font-size:0.8rem; color:#d32f2f; margin-top:5px;">
-                        ※もし2分経ってもツイートが見つからない場合は、<br>一番下の「退出する」ボタンを押してください。
-                    </p>
-                `;
-            }
-
-            const listContainer = document.getElementById('rep-song-list');
-            listContainer.innerHTML = "";
-            currentMatchData.songs.forEach((song, i) => {
-                const item = document.createElement('div');
-                item.className = "song-list-item";
-                item.innerText = `${i+1}. ${song}`;
-                listContainer.appendChild(item);
-            });
-        };
-
-        window.confirmResult = (res) => {
-            const now = Date.now();
-            const startTime = currentMatchData.createdAt ? currentMatchData.createdAt.toMillis() : now;
-            const elapsed = now - startTime;
-
-            if (elapsed < 300000) { 
-                alert("異常を検知しました。\n3曲とも演奏してから結果申告してください");
-                return;
-            }
-
-            selectedResult = res;
-            const map = { 'WIN':'勝ち', 'LOSE':'負け', 'DRAW':'引分' };
-            document.getElementById('modal-selection').innerText = map[res];
-            document.getElementById('confirm-modal').style.display = 'flex';
-        };
-
-        window.submitResult = async () => {
-            closeModal('confirm-modal');
-            switchScreen('waiting-result-screen');
-            const field = currentMatchData.isP1 ? "player1.result" : "player2.result";
-            isFinalizing = false; 
+            // IndexedDB (Firebaseのキャッシュ) を削除
             try {
-                await updateDoc(doc(db, "rooms", currentRoomId), { [field]: selectedResult });
-            } catch(e) { console.error(e); switchScreen('report-screen'); }
-        };
+                const dbs = await window.indexedDB.databases();
+                dbs.forEach(db => window.indexedDB.deleteDatabase(db.name));
+                console.log("キャッシュ削除完了");
+            } catch(e) { console.log("キャッシュ削除スキップ"); }
 
-        const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
-            const myRes = amIP1 ? p1Res : p2Res;
-            const oppRes = amIP1 ? p2Res : p1Res;
-            let valid = false;
-            if ((myRes === 'WIN' && oppRes === 'LOSE') ||
-                (myRes === 'LOSE' && oppRes === 'WIN') ||
-                (myRes === 'DRAW' && oppRes === 'DRAW')) {
-                valid = true;
-            }
-
-            if (valid) {
-                if(unsubscribeRoom) unsubscribeRoom();
-                if(heartbeatTimer) clearInterval(heartbeatTimer);
-                if(wakeLock) wakeLock.release().catch(()=>{});
-                
-                const K = 32;
-                const myRate = Number(currentMatchData.me.rate) || 1500;
-                const oppRate = Number(currentMatchData.opponent.rate) || 1500;
-                const expected = 1 / (1 + Math.pow(10, (oppRate - myRate) / 400));
-                
-                let actualScore = 0;
-                if (myRes === 'WIN') actualScore = 1;
-                else if (myRes === 'DRAW') actualScore = 0.5;
-
-                let diff = Math.round(K * (actualScore - expected));
-                if (diff === 0 && myRes === 'WIN') diff = 1;
-                if (diff === 0 && myRes === 'LOSE') diff = -1;
-
-                const newRate = myRate + diff;
-
-                try {
-                    await setDoc(doc(db, "users", currentUser.uid), { rate: newRate }, { merge: true });
-                    userData.rate = newRate; 
-                } catch (e) {}
-                showFinalResult(myRes, diff, newRate);
-            } else {
-                isFinalizing = false;
-                document.getElementById('error-modal').style.display = 'flex';
-            }
-        };
-
-        window.retryReport = async () => {
-            document.getElementById('error-modal').style.display = 'none';
-            const field = currentMatchData.isP1 ? "player1.result" : "player2.result";
-            try { await updateDoc(doc(db, "rooms", currentRoomId), { [field]: null }); } catch(e){}
-            goToReportScreen();
-        };
-
-        const triggerConfetti = () => {
-            const canvas = document.getElementById('confetti-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.style.display = 'block';
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            const pieces = [];
-            for(let i=0; i<150; i++) {
-                pieces.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                    size: Math.random() * 10 + 5,
-                    speed: Math.random() * 5 + 2,
-                    angle: Math.random() * 360
-                });
-            }
-
-            function draw() {
-                ctx.clearRect(0,0, canvas.width, canvas.height);
-                pieces.forEach(p => {
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size/2, 0, Math.PI*2);
-                    ctx.fill();
-                    p.y += p.speed;
-                    p.x += Math.sin(p.angle * Math.PI / 180) * 2;
-                    if(p.y > canvas.height) p.y = -20;
-                });
-                requestAnimationFrame(draw);
-            }
-            draw();
-            setTimeout(() => { canvas.style.display = 'none'; }, 5000); 
-        };
-
-        const showFinalResult = (result, diff, currentRate) => {
-            switchScreen('final-result-screen');
-            const title = document.getElementById('final-title');
-            const msg = document.getElementById('final-message');
-            const diffEl = document.getElementById('anim-rate-diff');
-            
-            diffEl.className = "rate-diff"; 
-            if(result === 'WIN') {
-                title.innerText = "WIN!"; title.className = "result-text-win";
-                msg.innerText = "おめでとうございます！";
-                diffEl.innerText = "+" + diff; diffEl.classList.add("plus");
-                triggerConfetti(); 
-            } else if(result === 'LOSE') {
-                title.innerText = "LOSE..."; title.className = "result-text-lose";
-                msg.innerText = "ドンマイ！次こそは！";
-                diffEl.innerText = diff; diffEl.classList.add("minus");
-            } else {
-                title.innerText = "DRAW"; title.className = ""; title.style.color = "#9c27b0";
-                msg.innerText = "熱い戦いでした！";
-                diffEl.innerText = (diff >= 0 ? "+" : "") + diff;
-                diffEl.style.background = "#9c27b0";
-            }
-
-            const rateValEl = document.getElementById('anim-rate-val');
-            const startRate = currentRate - diff;
-            const duration = 1500;
-            const startTime = performance.now();
-
-            function updateRate(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-                const val = Math.floor(startRate + diff * ease);
-                rateValEl.innerText = val;
-                if(progress < 1) requestAnimationFrame(updateRate);
-                else {
-                    rateValEl.innerText = currentRate;
-                    diffEl.classList.add('show'); 
-                }
-            }
-            requestAnimationFrame(updateRate);
-        };
-
-        window.tryExitRoom = () => {
-            document.getElementById('exit-confirm-modal-1').style.display = 'flex';
-        };
-        window.showExitConfirm2 = () => {
-            document.getElementById('exit-confirm-modal-1').style.display = 'none';
-            document.getElementById('exit-confirm-modal-2').style.display = 'flex';
-        };
-        window.forceExitRoom = async () => {
-            if (currentRoomId) {
-                try { await deleteDoc(doc(db, "rooms", currentRoomId)); } catch(e){}
-            }
-            if(heartbeatTimer) clearInterval(heartbeatTimer);
-            if(wakeLock) wakeLock.release().catch(()=>{});
-            localStorage.removeItem('current_room_id');
+            alert("リセット完了。\nページを再読み込みします。");
             location.reload();
-        };
-
-        window.returnToTitle = async () => {
-            if (currentRoomId) {
-                try { await deleteDoc(doc(db, "rooms", currentRoomId)); } catch(e){}
-            }
-            if(heartbeatTimer) clearInterval(heartbeatTimer);
-            if(wakeLock) wakeLock.release().catch(()=>{});
-            localStorage.removeItem('current_room_id');
-            location.reload();
-        };
-
-        window.cancelMatching = async () => {
-            if(matchTimer) clearTimeout(matchTimer); 
-            localStorage.removeItem('current_room_id');
-            if(waitingDocId) await deleteDoc(doc(db, "waiting_room", waitingDocId));
-            switchScreen('title-screen');
         };
     </script>
 </body>
