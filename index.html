@@ -135,11 +135,12 @@
         .song-list-box { text-align: left; margin: 10px 0; padding-left: 20px; font-weight: bold; color: #555; font-size: 0.9rem;}
         .song-list-item { margin-bottom: 5px; }
         
-        /* 連絡用表示スタイル (改修) */
+        /* 連絡用表示スタイル */
         .instruction-box { 
             background: #e3f2fd; border: 2px solid #2196f3; padding: 15px; border-radius: 10px; 
             font-size: 0.9rem; color: #0d47a1; margin-bottom: 15px; text-align: left; 
             line-height: 1.6;
+            user-select: text; -webkit-user-select: text;
         }
         .role-badge {
             display: inline-block; padding: 5px 10px; border-radius: 5px; color: white; font-weight: bold; margin-bottom: 8px;
@@ -471,6 +472,14 @@
             }
         };
 
+        // ★リダイレクトログインの結果を確認
+        getRedirectResult(auth).catch((error) => {
+            console.error("Redirect login error:", error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                alert("ログインに失敗しました。\n" + error.message);
+            }
+        });
+
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 currentUser = user;
@@ -774,14 +783,23 @@
 
                 instructionArea.innerHTML = `
                     <span class="role-badge role-guest">GUEST (参加)</span>
-                    <p>相手のプロフィールに飛び、ツイートを探してください。</p>
+                    <div style="background:white; padding:5px; border-radius:5px; margin:5px 0; font-weight:bold; color:#333;">
+                        対戦番号：<span style="font-size:1.3rem; color:#e91e63;">${matchId}</span>
+                    </div>
+
+                    <p>相手のプロフィールに飛び、上記番号のツイートを探してください。</p>
                     <p style="color:#d32f2f; font-weight:bold; background:#fff; padding:5px; border-radius:4px; margin:10px 0;">
                         ⚠️必ず「返信」欄を見てください！<br>
                         <span style="font-size:0.8rem; font-weight:normal;">(@1 ツイートは通常のポスト欄には表示されません)</span>
                     </p>
                     <a href="${profileUrl}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white;">相手のXプロフィールへ</a>
-                    <p style="font-size:0.8rem; color:#d32f2f; margin-top:10px;">
-                        ※1〜2分待ってもツイートがない場合は、<br>一番下の「退出する」ボタンを押してください。
+                    
+                    <div style="margin-top:15px; font-size:0.85rem; color:#555; line-height:1.4;">
+                        相手は2分以内にツイートするルールです。<br>
+                        まずは<strong>1分ほど待ってみてください！</strong>
+                    </div>
+                    <p style="font-size:0.8rem; color:#d32f2f; margin-top:5px;">
+                        ※もし2分経ってもツイートが見つからない場合は、<br>一番下の「退出する」ボタンを押してください。
                     </p>
                 `;
             }
