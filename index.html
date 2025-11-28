@@ -59,6 +59,7 @@
         .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
         .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; }
         
+        /* 注意書きボックス */
         .note-box {
             background: #fff3e0;
             border: 1px solid #ffe0b2;
@@ -134,6 +135,7 @@
         .song-list-item { margin-bottom: 5px; }
         .instruction-box { background: #e3f2fd; border: 2px solid #2196f3; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #0d47a1; margin-bottom: 15px; text-align: left; }
 
+        /* --- 豪華演出用スタイル --- */
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
         .result-container { margin: 20px 0; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.9); box-shadow: 0 0 30px rgba(255, 87, 34, 0.2); animation: popIn 0.5s; }
         .result-text-win { font-size: 4rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px #ffeb3b, 2px 2px 0px #f57f17; animation: pulse 1s infinite alternate; margin: 0; line-height: 1; }
@@ -157,7 +159,7 @@
         
         <div id="login-screen" class="screen active center-content">
             <h1 class="title-logo">DON-DER MATCH</h1>
-            <p class="sub-title">ログインして対戦を始めよう！</p>
+            <p class="sub-title">ログインして対戦を始めよう</p>
             
             <div class="note-box">
                 <strong>【推奨】</strong><br>
@@ -166,6 +168,7 @@
 
             <div class="login-btn-group" style="width: 100%;">
                 <button id="btn-login-google" class="btn btn-google">Googleでログイン</button>
+                
                 <div style="display:flex; gap:5px;">
                     <input type="email" id="email-input" class="input-field" placeholder="メールアドレス" style="margin:0;">
                     <input type="password" id="pass-input" class="input-field" placeholder="パスワード" style="margin:0;">
@@ -347,7 +350,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithRedirect, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // ★ signInWithPopup に戻しました
+        import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ★★★ APIキーを貼り付けてください ★★★
@@ -378,9 +382,6 @@
         let wakeLock = null; 
 
         // ★★★ 別ファイルから曲リストを読み込む場合はここに import 文を書く ★★★
-        // 例: import { songDatabase } from './songs.js';
-        
-        // とりあえず今はここに書いておきます
         const songDatabase = {
             'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
             'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
@@ -422,14 +423,18 @@
         if (savedMode) window.setViewMode(savedMode);
         else window.setViewMode('mobile');
 
-        // --- イベントリスナー設定 (Safari対策でJSからバインド) ---
+        // --- イベントリスナー設定 ---
         const bindBtn = (id, func) => {
             const el = document.getElementById(id);
             if(el) el.addEventListener('click', func);
         };
 
-        // ログイン系
-        bindBtn('btn-login-google', () => signInWithRedirect(auth, new GoogleAuthProvider()));
+        // ★ ログイン系 (Popup方式に戻し、エラーハンドリングを追加)
+        bindBtn('btn-login-google', () => {
+            signInWithPopup(auth, new GoogleAuthProvider())
+            .catch(e => alert("ログインエラー:\n" + e.message));
+        });
+        
         bindBtn('btn-login-email', async () => {
             const email = document.getElementById('email-input').value;
             const pass = document.getElementById('pass-input').value;
@@ -452,15 +457,6 @@
                 location.reload();
             }
         };
-
-        // ★追加: リダイレクトログインの結果を確認
-        getRedirectResult(auth).catch((error) => {
-            console.error("Redirect login error:", error);
-            // 失敗した時だけアラートを出す
-            if (error.code !== 'auth/popup-closed-by-user') {
-                alert("ログインに失敗しました。\n" + error.message);
-            }
-        });
 
         onAuthStateChanged(auth, async (user) => {
             if(user) {
