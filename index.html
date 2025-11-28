@@ -86,6 +86,7 @@
         .btn-orange { background: #ff5722; }
         .btn-blue { background: #2196f3; }
         .btn-green { background: #4caf50; }
+        .btn-teal { background: #009688; } /* ルールボタン用 */
         .btn-gray { background: #757575; }
         .btn-red { background: #d32f2f; }
         .btn-x-share { background: #000; margin-top: 5px; }
@@ -107,8 +108,23 @@
         .profile-rate { color: #ffd700; font-size: 1.1rem; }
         .settings-icon { cursor: pointer; font-size: 1.2rem; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .menu-btn { height: 80px; font-size: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        /* メニューグリッド (3列に変更) */
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 8px; 
+            margin-bottom: 20px; 
+        }
+        .menu-btn { 
+            height: 70px; 
+            font-size: 0.85rem; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            margin-bottom: 0;
+        }
+        .menu-btn span { font-size: 1.2rem; margin-bottom: 3px; }
         
         .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         .rank-table th { background: #ffccbc; padding: 8px; color: #d84315; }
@@ -145,14 +161,17 @@
         .role-badge {
             display: inline-block; padding: 5px 10px; border-radius: 5px; color: white; font-weight: bold; margin-bottom: 8px;
         }
-        .role-host { background: #e91e63; } /* 赤 */
-        .role-guest { background: #2196f3; } /* 青 */
+        .role-host { background: #e91e63; }
+        .role-guest { background: #2196f3; }
         
-        /* リザルト手順の強調ボックス */
         .result-step-box {
             margin-top: 15px; font-size: 0.85rem; background: #fff; padding: 10px; border-radius: 8px; color: #333;
         }
         .highlight-text { color: #d32f2f; font-weight: bold; }
+
+        /* ルールモーダル用 */
+        .rule-section { text-align: left; margin-bottom: 15px; font-size: 0.9rem; line-height: 1.5; }
+        .rule-title { font-weight: bold; color: #ff5722; border-bottom: 2px solid #ffccbc; display: inline-block; margin-bottom: 5px; }
 
         /* --- 豪華演出用スタイル --- */
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
@@ -215,10 +234,13 @@
                     <span class="settings-icon" onclick="openProfileModal()">⚙️設定</span>
                 </div>
             </div>
+            
             <div class="menu-grid">
+                <button id="btn-rules" class="btn btn-teal menu-btn"><span>📖</span>ルール</button>
                 <button class="btn btn-orange menu-btn" onclick="openRanking()"><span>🏆</span>ランキング</button>
                 <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')"><span>📜</span>対戦履歴</button>
             </div>
+
             <p style="font-weight:bold; margin-bottom:10px;">対戦難易度を選択</p>
             <button id="btn-mode-normal" class="btn btn-green">難易度 F ～ A+</button>
             <button id="btn-mode-hard" class="btn btn-orange">難易度 S ～ SS</button>
@@ -245,9 +267,7 @@
         <div id="report-screen" class="screen center-content" style="justify-content: flex-start; padding-top: 20px;">
             <h2>結果報告</h2>
             <div class="scrollable-content">
-                
-                <div id="instruction-area" class="instruction-box">
-                    </div>
+                <div id="instruction-area" class="instruction-box"></div>
 
                 <div style="background:#f5f5f5; padding:15px; border-radius:10px; width:100%; text-align:left;">
                     <p><strong>相手:</strong> <span id="rep-opp-name" style="font-weight:bold;"></span></p>
@@ -287,6 +307,42 @@
                 </div>
             </div>
             <button id="btn-return-title" class="btn btn-gray" style="margin-top:30px;">タイトルへ戻る</button>
+        </div>
+    </div>
+
+    <div id="rule-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:500px; max-height:80vh; overflow-y:auto; text-align:left;">
+            <h3 style="text-align:center; margin-bottom:20px;">遊び方・ルール</h3>
+            
+            <div class="rule-section">
+                <div class="rule-title">1. マッチングと役割</div>
+                <p>マッチングが成立すると、ランダムに<strong>HOST（ホスト）</strong>と<strong>GUEST（ゲスト）</strong>に分かれます。<br>
+                <strong>HOST:</strong> 対戦番号をツイートする係<br>
+                <strong>GUEST:</strong> そのツイートを検索してリプする係</p>
+            </div>
+
+            <div class="rule-section">
+                <div class="rule-title">2. X (Twitter) でのやり取り</div>
+                <p>ホストのツイートに「よろしくお願いします！」とリプライし、そのツリー（返信欄）に<strong>お互いが1曲ずつリザルト画像を貼ってください。</strong></p>
+            </div>
+
+            <div class="rule-section">
+                <div class="rule-title">3. 勝敗条件</div>
+                <p>課題曲3曲の<strong>「良」の数の合計</strong>が多い方が勝利です。<br>(不可やコンボ数は関係ありません)</p>
+            </div>
+
+            <div class="rule-section">
+                <div class="rule-title">4. 注意事項</div>
+                <ul style="padding-left:20px; font-size:0.85rem;">
+                    <li>Xの通知が増えるため、<strong>専用アカウントの作成を推奨</strong>します。</li>
+                    <li>相手が音信不通になった場合、約13分で自動的に無効試合になります。</li>
+                    <li>5分以内に結果報告をしようとするとエラーになります（不正防止のため）。</li>
+                </ul>
+            </div>
+
+            <div style="text-align:center; margin-top:20px;">
+                <button class="btn btn-gray" onclick="closeModal('rule-modal')">閉じる</button>
+            </div>
         </div>
     </div>
 
@@ -369,7 +425,7 @@
         import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ★★★ APIキーを貼り付けてください ★★★
-        const firebaseConfig = {
+        const firebaseConfig =  {
   apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
   authDomain: "taikorating.firebaseapp.com",
   projectId: "taikorating",
@@ -447,14 +503,12 @@
             if(el) el.addEventListener('click', func);
         };
 
-        // ログイン系 (Popup)
+        // ログイン系
         bindBtn('btn-login-google', () => {
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
-            signInWithPopup(auth, provider)
-            .catch(e => alert("ログインエラー:\n" + e.message));
+            signInWithPopup(auth, provider).catch(e => alert("ログインエラー:\n" + e.message));
         });
-        
         bindBtn('btn-login-email', async () => {
             const email = document.getElementById('email-input').value;
             const pass = document.getElementById('pass-input').value;
@@ -464,11 +518,12 @@
         });
         bindBtn('btn-login-anon', () => signInAnonymously(auth).catch(e => alert(e.message)));
 
-        // モード選択・キャンセル
+        // メニュー・マッチング系
         bindBtn('btn-mode-normal', () => window.tryStartMatching('normal'));
         bindBtn('btn-mode-hard', () => window.tryStartMatching('hard'));
         bindBtn('btn-cancel-match', () => window.cancelMatching());
         bindBtn('btn-return-title', () => window.returnToTitle());
+        bindBtn('btn-rules', () => document.getElementById('rule-modal').style.display = 'flex');
 
         // --- ログアウト処理 ---
         window.confirmLogout = async () => {
@@ -478,7 +533,6 @@
             }
         };
 
-        // ★リダイレクトログインの結果を確認
         getRedirectResult(auth).catch((error) => {
             console.error("Redirect login error:", error);
             if (error.code !== 'auth/popup-closed-by-user') {
@@ -494,15 +548,12 @@
                     const userSnap = await getDoc(userRef);
                     if (userSnap.exists()) {
                         userData = userSnap.data();
-                        
-                        // BANチェック
                         if (userData.isBanned) {
                             alert("このアカウントは凍結されています。");
                             await signOut(auth);
                             location.reload();
                             return;
                         }
-
                         if(userData.rate === undefined) userData.rate = 1500;
                     } else {
                         userData = { displayName: "名無しどん", xId: "未設定", rate: 1500, createdAt: new Date() };
@@ -589,7 +640,6 @@
             switchScreen('matching-screen');
             document.getElementById('match-status').innerText = "対戦相手を待っています...";
             try {
-                // 安全マージン: 60秒以上経過した古いデータを削除
                 const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(20));
                 const snap = await getDocs(q);
                 let opponentDoc = null;
@@ -604,10 +654,7 @@
                 }
 
                 if(opponentDoc) {
-                    // ★ 順番変更: 先に部屋を作る！
                     const opp = opponentDoc.data();
-                    
-                    // 8桁の数字ID生成
                     const matchId = Math.floor(10000000 + Math.random() * 90000000).toString();
 
                     const roomRef = await addDoc(collection(db, "rooms"), {
@@ -617,9 +664,7 @@
                         player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, rate: userData.rate, result: null, lastSeen: Date.now() }
                     });
                     
-                    // その後に削除
                     await deleteDoc(doc(db, "waiting_room", opponentDoc.id));
-
                     localStorage.setItem('current_room_id', roomRef.id);
                     requestWakeLock();
                     startHeartbeat(roomRef.id);
@@ -636,11 +681,8 @@
                         if(waitingDocId) {
                             if(unsubscribeRoom) unsubscribeRoom();
                             unsubscribeRoom = null;
-                            
-                            // ★ 念のための最終確認: 自分のIDの部屋ができていないか？
                             const me1 = await getDocs(query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid)));
                             if(!me1.empty) {
-                                // 部屋発見！キャンセル中止
                                 const roomDoc = me1.docs[0];
                                 waitingDocId = null; 
                                 localStorage.setItem('current_room_id', roomDoc.id);
@@ -649,13 +691,12 @@
                                 watchRoom(roomDoc.id);
                                 return;
                             }
-
                             try { await deleteDoc(doc(db, "waiting_room", waitingDocId)); } catch(e){}
                             waitingDocId = null;
                             switchScreen('title-screen');
                             alert("【タイムアウト】\n一定時間マッチングしなかったため、\n自動キャンセルしました。");
                         }
-                    }, 60000); // 60秒待機
+                    }, 60000);
 
                     const roomQ = query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid));
                     unsubscribeRoom = onSnapshot(roomQ, snap => {
@@ -705,7 +746,6 @@
                 
                 currentMatchData = { me, opponent, songs: data.songs, isP1, createdAt: data.createdAt, matchId: data.matchId };
 
-                // 切断検知 (780秒 = 13分)
                 const now = Date.now();
                 if (opponent.lastSeen && (now - opponent.lastSeen > 780000)) { 
                     deleteDoc(doc(db, "rooms", roomId)).catch(()=>{});
@@ -724,7 +764,6 @@
                 } else {
                     const isGaming = document.getElementById('reveal-screen').classList.contains('active') ||
                                      document.getElementById('report-screen').classList.contains('active');
-                    
                     if (document.getElementById('waiting-result-screen').classList.contains('active')) {
                         goToReportScreen();
                     } else if (!isGaming) {
@@ -764,7 +803,7 @@
             document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
             
             // HOST/GUEST 表示分け
-            const isHost = currentMatchData.isP1; // Player1がHOST
+            const isHost = currentMatchData.isP1;
             const matchId = currentMatchData.matchId || "--------";
             const instructionArea = document.getElementById('instruction-area');
             
@@ -795,7 +834,6 @@
                     </p>
                 `;
             } else {
-                // IDから @ を除去
                 const cleanId = currentMatchData.opponent.xId ? currentMatchData.opponent.xId.replace('@', '') : '';
                 const profileUrl = `https://twitter.com/${cleanId}`;
                 const searchText = `@1 対戦番号${matchId}`;
