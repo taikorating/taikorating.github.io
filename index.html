@@ -335,48 +335,31 @@
         let isFinalizing = false;
         let matchTimer = null;
         let heartbeatTimer = null;
-        let wakeLock = null; // WakeLock用変数
+        let wakeLock = null; 
 
         const songDatabase = {
             'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
             'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
 
-        // --- Wake Lock (画面常時点灯) ---
         const requestWakeLock = async () => {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock active');
-                    // 解除されたら再取得を試みる（タブ切り替え復帰時など）
-                    wakeLock.addEventListener('release', () => {
-                        console.log('Wake Lock released');
-                    });
+                    wakeLock.addEventListener('release', () => {});
                 }
-            } catch (err) {
-                console.error('Wake Lock error:', err);
-            }
+            } catch (err) { console.error(err); }
         };
-
-        // タブがアクティブに戻った時に再取得
         document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
-                await requestWakeLock();
-            }
+            if (wakeLock !== null && document.visibilityState === 'visible') await requestWakeLock();
         });
 
-        // --- タブ閉じ検知 ---
         const handleUnload = () => {
-            if (currentRoomId && currentUser) {
-                deleteDoc(doc(db, "rooms", currentRoomId)).catch(()=>{});
-            }
-            if (waitingDocId) {
-                deleteDoc(doc(db, "waiting_room", waitingDocId)).catch(()=>{});
-            }
+            if (currentRoomId && currentUser) deleteDoc(doc(db, "rooms", currentRoomId)).catch(()=>{});
+            if (waitingDocId) deleteDoc(doc(db, "waiting_room", waitingDocId)).catch(()=>{});
         };
         window.addEventListener('beforeunload', handleUnload);
 
-        // --- View Mode ---
         window.setViewMode = (mode) => {
             const container = document.getElementById('main-container');
             const btnMobile = document.getElementById('btn-mobile');
@@ -395,7 +378,6 @@
         if (savedMode) window.setViewMode(savedMode);
         else window.setViewMode('mobile');
 
-        // --- Auth ---
         window.loginAnon = () => signInAnonymously(auth).catch(e => alert(e.message));
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
         window.loginWithEmail = async () => {
@@ -483,7 +465,7 @@
              try {
                  const roomSnap = await getDoc(doc(db, "rooms", roomId));
                  if(roomSnap.exists()) {
-                     requestWakeLock(); // 復帰時も画面常時点灯
+                     requestWakeLock();
                      startHeartbeat(roomId);
                      watchRoom(roomId);
                  } else {
@@ -501,7 +483,8 @@
             switchScreen('matching-screen');
             document.getElementById('match-status').innerText = "対戦相手を待っています...";
             try {
-                // ゴースト退治 (15秒以上古い待機データは削除)
+                // 安全マージン: 12秒以上待っている人とはマッチしない
+                // ゴースト退治: 15秒以上古いデータは削除
                 const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(20));
                 const snap = await getDocs(q);
                 let opponentDoc = null;
@@ -509,10 +492,17 @@
 
                 for (const d of snap.docs) {
                     const data = d.data();
-                    if (data.createdAt && (now - data.createdAt.toMillis() > 15000)) {
+                    const elapsed = data.createdAt ? (now - data.createdAt.toMillis()) : 99999;
+                    
+                    if (elapsed > 15000) {
                         deleteDoc(doc(db, "waiting_room", d.id)).catch(()=>{});
                         continue; 
                     }
+                    // ★安全マージン: 12秒以上経過している相手はスキップ
+                    if (elapsed > 12000) {
+                        continue;
+                    }
+
                     if(data.uid !== currentUser.uid) {
                         opponentDoc = d;
                         break;
@@ -528,7 +518,7 @@
                         player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, result: null, lastSeen: Date.now() }
                     });
                     localStorage.setItem('current_room_id', roomRef.id);
-                    requestWakeLock(); // マッチ成立で画面点灯開始
+                    requestWakeLock();
                     startHeartbeat(roomRef.id);
                     watchRoom(roomRef.id);
                 } else {
@@ -557,7 +547,7 @@
                                 if(matchTimer) clearTimeout(matchTimer); 
                                 waitingDocId = null; unsubscribeRoom();
                                 localStorage.setItem('current_room_id', c.doc.id);
-                                requestWakeLock(); // マッチ成立で画面点灯開始
+                                requestWakeLock();
                                 startHeartbeat(c.doc.id);
                                 watchRoom(c.doc.id);
                             }
@@ -567,15 +557,13 @@
             } catch(e) { console.error(e); alert("マッチングエラー"); switchScreen('title-screen'); }
         };
 
-        // --- ハートビート送信 ---
         const startHeartbeat = (roomId) => {
             if(heartbeatTimer) clearInterval(heartbeatTimer);
-            // 初回送信
             updateLastSeen(roomId);
             heartbeatTimer = setInterval(() => {
                 if(!currentRoomId) return;
                 updateLastSeen(roomId);
-            }, 5000); // 5秒ごとに更新
+            }, 5000); 
         };
 
         const updateLastSeen = async (roomId) => {
@@ -600,7 +588,7 @@
                 
                 currentMatchData = { me, opponent, songs: data.songs, isP1 };
 
-                // ★ 切断検知 (780秒 = 13分 以上更新がなければ切断とみなす)
+                // ★ 切断検知 (780秒 = 13分)
                 const now = Date.now();
                 if (opponent.lastSeen && (now - opponent.lastSeen > 780000)) { 
                     deleteDoc(doc(db, "rooms", roomId)).catch(()=>{});
@@ -631,7 +619,7 @@
 
         const handleForceExit = (msg) => {
             if(heartbeatTimer) clearInterval(heartbeatTimer);
-            if(wakeLock) wakeLock.release().then(()=> wakeLock = null).catch(()=>{}); // 画面点灯解除
+            if(wakeLock) wakeLock.release().then(()=> wakeLock = null).catch(()=>{});
             localStorage.removeItem('current_room_id');
             alert(msg);
             location.reload();
@@ -742,7 +730,6 @@
             setTimeout(() => diffEl.classList.add('show'), 500);
         };
 
-        // --- 退出ロジック ---
         window.tryExitRoom = () => {
             document.getElementById('exit-confirm-modal-1').style.display = 'flex';
         };
