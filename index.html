@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>太鼓レーティングマッチ</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;900&display=swap" rel="stylesheet">
     <style>
         /* --- 基本リセット --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'M PLUS Rounded 1c', "Hiragino Kaku Gothic ProN", sans-serif;
@@ -17,6 +17,9 @@
             color: #333;
             overflow-y: auto;
             min-height: 100vh;
+            /* スマホでの文字選択などを防止してアプリっぽく */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* --- メインコンテナ --- */
@@ -57,7 +60,6 @@
         .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
         .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; }
         
-        /* 注意書きボックス */
         .note-box {
             background: #fff3e0;
             border: 1px solid #ffe0b2;
@@ -68,10 +70,19 @@
             text-align: left;
             margin-bottom: 20px;
             line-height: 1.4;
+            user-select: text;
+            -webkit-user-select: text;
         }
 
         button { font-family: inherit; outline: none; }
-        .btn { border: none; padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.1s; width: 100%; font-weight: bold; color: white; margin-bottom: 10px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); position: relative; top: 0;}
+        .btn { 
+            border: none; padding: 12px; border-radius: 10px; 
+            cursor: pointer; transition: 0.1s; width: 100%; 
+            font-weight: bold; color: white; margin-bottom: 10px; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1); position: relative; top: 0;
+            /* ★スマホでのタップ遅延をなくす設定 */
+            touch-action: manipulation;
+        }
         .btn:active { top: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
         .btn-orange { background: #ff5722; }
         .btn-blue { background: #2196f3; }
@@ -80,12 +91,11 @@
         .btn-red { background: #d32f2f; }
         
         .view-toggle-box { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
-        .view-btn { background: transparent; border: 2px solid #aaa; color: #555; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 0 5px; }
+        .view-btn { background: transparent; border: 2px solid #aaa; color: #555; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 0 5px; touch-action: manipulation; }
         .view-btn.active { background: #555; color: white; border-color: #555; }
 
         .login-btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .btn-google { background: #db4437; }
-        .btn-x { background: #000; }
         .btn-email { background: #607d8b; }
         
         .profile-bar {
@@ -117,7 +127,7 @@
         .modal-box { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s; }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        .input-field { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; }
+        .input-field { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1rem; user-select: text; -webkit-user-select: text;}
         .input-label { display: block; text-align: left; font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; color: #555; }
         .loader { border: 6px solid #f3f3f3; border-top: 6px solid #ff5722; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -126,7 +136,6 @@
         .song-list-item { margin-bottom: 5px; }
         .instruction-box { background: #e3f2fd; border: 2px solid #2196f3; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #0d47a1; margin-bottom: 15px; text-align: left; }
 
-        /* --- 豪華演出用スタイル --- */
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
         .result-container { margin: 20px 0; padding: 20px; border-radius: 20px; background: rgba(255,255,255,0.9); box-shadow: 0 0 30px rgba(255, 87, 34, 0.2); animation: popIn 0.5s; }
         .result-text-win { font-size: 4rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px #ffeb3b, 2px 2px 0px #f57f17; animation: pulse 1s infinite alternate; margin: 0; line-height: 1; }
@@ -158,20 +167,20 @@
             </div>
 
             <div class="login-btn-group" style="width: 100%;">
-                <button class="btn btn-google" onclick="loginWithGoogle()">Googleでログイン</button>
+                <button id="btn-login-google" class="btn btn-google">Googleでログイン</button>
                 <div style="display:flex; gap:5px;">
                     <input type="email" id="email-input" class="input-field" placeholder="メールアドレス" style="margin:0;">
                     <input type="password" id="pass-input" class="input-field" placeholder="パスワード" style="margin:0;">
                 </div>
                 <div style="display:flex; gap:5px;">
-                    <button class="btn btn-email" onclick="loginWithEmail()">登録/ログイン</button>
+                    <button id="btn-login-email" class="btn btn-email">登録/ログイン</button>
                 </div>
-                <button class="btn btn-gray" onclick="loginAnon()">匿名で始める</button>
+                <button id="btn-login-anon" class="btn btn-gray">匿名で始める</button>
             </div>
             <div class="view-toggle-box">
                 <p style="font-size:0.8rem; margin-bottom:10px;">表示モード切り替え</p>
-                <button class="view-btn active" id="btn-mobile" onclick="setViewMode('mobile')">スマホ版</button>
-                <button class="view-btn" id="btn-pc" onclick="setViewMode('pc')">PC版</button>
+                <button id="btn-mobile" class="view-btn active" onclick="setViewMode('mobile')">スマホ版</button>
+                <button id="btn-pc" class="view-btn" onclick="setViewMode('pc')">PC版</button>
             </div>
         </div>
 
@@ -192,8 +201,8 @@
                 <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')"><span>📜</span>対戦履歴</button>
             </div>
             <p style="font-weight:bold; margin-bottom:10px;">対戦難易度を選択</p>
-            <button class="btn btn-green" onclick="tryStartMatching('normal')">難易度 F ～ A+</button>
-            <button class="btn btn-orange" onclick="tryStartMatching('hard')">難易度 S ～ SS</button>
+            <button id="btn-mode-normal" class="btn btn-green">難易度 F ～ A+</button>
+            <button id="btn-mode-hard" class="btn btn-orange">難易度 S ～ SS</button>
         </div>
 
         <div id="matching-screen" class="screen center-content">
@@ -201,7 +210,7 @@
             <h3>対戦相手を探しています...</h3>
             <p id="match-status" style="color:#ff5722; margin-top:10px; font-weight:bold;"></p>
             <p style="font-size:0.8rem; color:#777; margin-top:5px;">※約60秒経過すると自動キャンセルされます</p>
-            <button class="btn btn-gray" style="margin-top:30px; width:50%;" onclick="cancelMatching()">キャンセル</button>
+            <button id="btn-cancel-match" class="btn btn-gray" style="margin-top:30px; width:50%;">キャンセル</button>
         </div>
 
         <div id="reveal-screen" class="screen" style="padding-top:20px;">
@@ -261,7 +270,7 @@
                     <div class="rate-diff" id="anim-rate-diff">+20</div>
                 </div>
             </div>
-            <button class="btn btn-gray" style="margin-top:30px;" onclick="returnToTitle()">タイトルへ戻る</button>
+            <button id="btn-return-title" class="btn btn-gray" style="margin-top:30px;">タイトルへ戻る</button>
         </div>
     </div>
 
@@ -344,7 +353,7 @@
         import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ★★★ APIキーを貼り付けてください ★★★
-        const firebaseConfig = {
+        const firebaseConfig =  {
   apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
   authDomain: "taikorating.firebaseapp.com",
   projectId: "taikorating",
@@ -353,7 +362,6 @@
   appId: "1:657970223088:web:509230d6b20d78cbf3af35",
   measurementId: "G-PJXEXL5E9M"
 };
-
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -372,12 +380,8 @@
         let wakeLock = null; 
 
         const songDatabase = {
-            'normal': [
-                "アムピト◇リーテー","ouroboros -twin stroke of the end-","χ談","カラフル","彼は誰時の誘惑（裏）","ココドコ？多分ドッカ島！（裏）","コネクトカラーズ","GORI × GORI × SafaRI（裏）","万戈イム－一ノ十","青天の黎明","Central Dogma Pt.2","Taiko Drum Monster（表）","DEBSTEP!","Dreadnought（裏）","Don't Stop the Game","HARDCOREノ心得","幕末維新譚","†バチ!ムチ!?マッスルキングダム†","Hello, Worldooon!!（裏）","パン vs ごはん！ 大決戦！（裏）[達人]","ピッチフェイダ（裏）","for Q（裏）","プチポチ","Behemoth","まるくてはやくてすさまじいリズム","モノクロームユートピア","ラパスの虹（裏）","赤と白薔薇の魔女","あめふりのロンド（裏）","ON SAY GO SAY（裏）","カルメン組曲 一番終曲（裏）","森羅万象[開幕達人]","双竜ノ乱（裏）【双打】","デッド・オア・ダイ","23時54分、陽の旅路へのプレリュード（表）","にゃーにゃーにゃー","メタナイトの逆襲メドレー（裏）","8OROCHI（裏）","哀 want U","蒼鷺之火（裏）","或ル不和","VERTeX","美しく忙しきドナウ（裏）","ウルトラマンX（裏）","郢曲／暁闇","Agent Hustle & Dr. Hassle（表）","GERBERA","雲間を游ぐ","The Future of the 太鼓ドラム（表）","SAVAGE DELIGHT","〆ドレー2000","重金属フューギティブ","Xevel","其方、激昂","超絶技巧系少女","テトラリュトモスフォビア","天泣の律","転生〈TENSEI〉-喜与志が待つ強者-（裏）","Toon Town's Toys' Tune","ナイトメア・サバイバー（裏）","BATTLE NO.1[達人]","Honey Heartbeat ～10 Stars Mix～（裏）","Parousia","パン vs ごはん！ 大決戦！（表）[達人]","vs.VIGVANGS（表）","Mood Swing（裏）","もぺもぺ","螺旋周回軌道（裏）","LECIEL GLISSANDO","LUNATiC CiRCUiT","冷凍庫CJ ～嗚呼面太鼓ブラザーズ～","ARMAGEΔDON","Unwelcome School (MRM REMIX)（裏）","Irregular Clock（裏）","EterNal Ring","懐中庭園を持つ少女","絡繰廻廊","Caribbean Knight","GIGALODOON（裏）","鼓立あおはる学園校歌","束ね糸","チルノのパーフェクトさんすう教室➈周年バージョン（裏）","儚姫は原初に舞う（裏）","ひよこ鑑定士さん","FLOWER（裏）","BLAZING VORTEX（裏）","Player's High","ANiMA","Altale（裏）","Aleph-0","UNDEAD HEART(怒りのWarriors)","イオシス秋の爆食祭2024","怒槌","Valsqotch","OK I’m blue rat","KAGEKIYO（裏）","CUT! into the FUTURE（表）","極圏","沓の子を打つ（裏）","クラポルポルスカ","Groovy Duel","Goldfish City","Got more raves?（裏）","秋竜 ～Shiuryu～（裏）","疾風怒濤（表）","承認欲Q","Singularity Game","晨星ト鵺","SUPERNOVA（裏）","Stick Trick ShowTime!!","閃光天舞","SoulStone -闇喰イサァカス団-","SORA-VII シグナスウォール","月読命","電脳幻夜の星言詠","トイマチック☆パレード!!","Doom Noiz","Hello, Mr.JOKER","人のお金で焼肉を食したい！（裏）","FUJIN Rumble","Help me, さいたま2000!!","またさいたま2000","三瀬川乱舞（裏）","メカデス。（裏）","めためた☆ゆにば～すっ！（裏）","モノクロボイス（表）","Re：End of a Dream（裏）","竜と黒炎の姫君（裏）","練習曲Op.10-4（裏）","Rotter Tarmination（裏）","六本の薔薇と采の歌（裏）","What's in the box?","あなたとトゥラッタッタ♪（裏）","Aragami","案山子姫 -Princess Scarecrow-（裏）","Garakuta Doll Play（裏）","カラフルボイス（裏）","Calculator","気焔万丈神楽","Kill My Fortune（裏）","ゲゲゲの鬼太郎（裏）","刻竜 ～Kokuryu～（表）","神竜 ～Shinryu～（表）","Scarlet Lance","星河一天","憎悪と醜悪の花束（表）","Destr0yer（裏）","ドドドドドンだフル！（裏）","はたラク2000","Vixtory（表）","秘ナルメジェドノ悲ナル憂鬱","メタルホーク BGM1","memoria ficta","燎原ノ舞","愛と浄罪の森","アサガオ","Abyss of hell（裏）","天照","Ignis Danse","Illusion Flare","うちゅうひこうし冒険譚","ex寅 Trap!!","Evidence of evil","カラ鞠の花","ギガンティックO.T.N（裏）","きゅうくらりん（裏）","共奏鼓祭（裏）","Chronomia","弧","ゴーストマスク","ゴッドソング（裏）","God Ray","鼓舞曲「閻魔」","潮騒205号SSS線","紫煌ノ乱","蛇鉄","須佐之男","Spectral Rider","Soulway（達人）","D's Adventure Note","D絶対！SAMURAIインザレイン（裏）","Telecastic fake show","てんぢく2000","弩蚊怒夏","とける（表）","Dogbite","Doppelgangers（裏）","白鳥の湖～still a duckling～（裏）","ハンロック","平等院鳳凰ドン vs 鳥獣戯カッ（裏）","ヘイラ（裏）","ヘイラ（にじさんじVer.）（裏）","ペットショップ大戦","MagiCatz","ミュージック・リボルバー（裏）","YOU're your HERO","六華の舞","wonderful ROUTINE","あの日出会えたキセキ","アンリミテッドゲームズ（表）","ギミチョコ!!（裏）","Gloria","濃紅","濃紅（にじさんじVer.）","ココロボ","Central Dogma Pt.1（表）","夏祭り / ジッタリン・ジン（裏）","Purple Rose Fusion","みんなのうた","MEGALOVANIA（裏）","4+1のそれぞれの未来","Lightning Boys（表）","アキバ20XX","Aloft in the wind（裏）","イガク（裏）","頂","INSPION","ウィーアー！（裏）","waitin' for u","Angel Halo","オーバード（裏）","オーブの祈り","Oshama Scramble!（裏）","GIGALODOON（表）","きたさいたま2000","キャラメル・ジャンキヰ","Surf Zapping","Silent Jealousy（裏）","セイクリッド ルイン（裏）","零の交響曲（裏）","そつおめしき2ばん","十露盤2000","Diving Drive","ダンガンノーツ（表）","天下統一録","ドドンガド～ン（裏）","No Gravity","ノるどん2000","VICTORIA","ピコピコ ルイン（裏）","VIVIVIVID","FREEDOM DiVE↓","Venomous（裏）","星屑ストラック（表）","8OROCHI（表）","YOAKE","夜桜謝肉祭（裏）","ラヴ♡スパイス♡ライクユー!!!","Libera Ray","詩謳兎揺蕩兎","Extreme End","Emma（裏）[普通]","Garakuta Doll Play（裏）【双打】","ゴーゴー・キッチン（裏）","最終鬼畜妹フランドール・S","タイコタイム（裏）","乱数調整のリバースシンデレラ（裏）","R.I.","蒼の旋律（裏）","朱の旋律","EkiBEN2000","Kamikaze Remix","Calamity Fortune（表）","キューティー☆デモニック☆魔人エモ!!","【双打】紅（裏）","さちさちにしてあげる♪（裏）","スーパーD＆D ～完全にリードしてアイマイミー～","SUPERNOVA（表）","SstTAarR*","Soulway（開幕普通）","タイコロール","タベルナ2000","儚姫は原初に舞う（表）","BATTLE NO.1[玄人]","ヒバナ（裏）","Blessed Bouquet Buskers","よーいドン！","そつおめしき","初音ミクの激唱（表）","初音ミクの激唱（裏）","パン vs ごはん！ 大決戦！（表）[普通]","パン vs ごはん！ 大決戦！（裏）[普通]","Black Rose Apostle（表）","Black Rose Apostle（裏）","マツヨイナイトバグ（裏）","X-DAY2000","KAGEKIYO（裏）【双打】","Clotho クロートー","旋風ノ舞【天】（表）","旋風ノ舞【天】（裏）","チルノのパーフェクトさんすう教室（裏）","ネクロファンタジア ～ Arr.Demetori","拝啓ドッペルゲンガー","BATTLE NO.1[普通]","mint tears"
-            ],
-            'hard': [
-                "Infinite Rebellion","彁（裏）","CRUXNAUT","The Future of the 太鼓ドラム（裏）","神竜 ～Shinryu～（裏）","憎悪と醜悪の花束（裏）","ダーク・エクス・マキナ♡","第六天魔王（表）","第六天魔王（裏）","ダンガンノーツ（裏）","Destination 2F29","ドンカマ2000","23時54分、陽の旅路へのプレリュード（裏）","Vixtory（裏）","vs.VIGVANGS（裏）","poxei♦DOON","幽玄ノ乱","!!!カオスタイム!!!","†††カオスタイム the DARK†††","Calamity Fortune（裏）","業 -善なる神とこの世の悪について-（裏）","最果の魔法使い（裏）","siren's eye","疾風怒濤（裏）","Central Dogma Pt.1（裏）","魑魅魍魎","とける（裏）","トロいか2000","ラ・モレーナ・クモナイ（裏）","アンリミテッドゲームズ（裏）","Emma（裏）[達人]","CUT! into the FUTURE（裏）","刻竜 ～Kokuryu～（裏）","!!!チルノのパーフェクトさんすうタイム!!!","まださいたま2000","4+1のそれぞれの未来（裏）[達人]","4+1のそれぞれの未来（裏）[玄人]","4+1のそれぞれの未来（裏）[普通]","オペレート・ミー（裏）","彁（表）","仮想現実のテレスコープ（裏）","Coquette","Synthesis.（裏）","スーハー2000","続・〆ドレー2000","そして勇者は眠りにつく（裏）","Taiko Drum Monster（裏）","Challengers","≠ＭＭ","Hurtling Boys","初音ミクの消失‐劇場版‐（裏）","星屑ストラック（裏）","Lightning Boys（裏）","Lδchesis（裏）","λ7708","わら得る2000","Xa（裏）","狂瀾怒濤（裏）","氷竜～Kooryu～（裏）","Genesis Ray（裏）","双竜ノ乱","たいこの2000","チャーリーダッシュ！","Nosferatu（裏）","POLARiSNAUT","モノクロボイス（裏）","UFO Swingin'"
-            ]
+            'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
+            'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
 
         const requestWakeLock = async () => {
@@ -416,18 +420,28 @@
         if (savedMode) window.setViewMode(savedMode);
         else window.setViewMode('mobile');
 
-        window.loginAnon = () => signInAnonymously(auth).catch(e => alert(e.message));
-        
-        // ★ リダイレクト方式に変更
-        window.loginWithGoogle = () => signInWithRedirect(auth, new GoogleAuthProvider());
-        
-        window.loginWithEmail = async () => {
+        // --- イベントリスナー設定 (Safari対策でJSからバインド) ---
+        const bindBtn = (id, func) => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('click', func);
+        };
+
+        // ログイン系
+        bindBtn('btn-login-google', () => signInWithRedirect(auth, new GoogleAuthProvider()));
+        bindBtn('btn-login-email', async () => {
             const email = document.getElementById('email-input').value;
             const pass = document.getElementById('pass-input').value;
             if(!email || !pass) return alert("入力してください");
             try { await signInWithEmailAndPassword(auth, email, pass); }
             catch(e) { try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e2) { alert(e2.message); } }
-        };
+        });
+        bindBtn('btn-login-anon', () => signInAnonymously(auth).catch(e => alert(e.message)));
+
+        // モード選択・キャンセル
+        bindBtn('btn-mode-normal', () => window.tryStartMatching('normal'));
+        bindBtn('btn-mode-hard', () => window.tryStartMatching('hard'));
+        bindBtn('btn-cancel-match', () => window.cancelMatching());
+        bindBtn('btn-return-title', () => window.returnToTitle());
 
         // --- ログアウト処理 ---
         window.confirmLogout = async () => {
@@ -618,11 +632,7 @@
                         });
                     });
                 }
-            } catch(e) { 
-    console.error(e); 
-    alert("エラー詳細:\n" + e.message); // ←ここを変える
-    switchScreen('title-screen'); 
-}
+            } catch(e) { console.error(e); alert("マッチングエラー:\n" + e.message); switchScreen('title-screen'); }
         };
 
         const startHeartbeat = (roomId) => {
