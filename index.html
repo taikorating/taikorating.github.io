@@ -59,6 +59,7 @@
         .title-logo { font-size: 2.2rem; color: #ff5722; text-shadow: 2px 2px 0px #ffe0b2; margin-bottom: 5px; }
         .sub-title { color: #f57c00; font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; }
         
+        /* 注意書きボックス */
         .note-box {
             background: #fff3e0;
             border: 1px solid #ffe0b2;
@@ -87,7 +88,7 @@
         .btn-green { background: #4caf50; }
         .btn-gray { background: #757575; }
         .btn-red { background: #d32f2f; }
-        .btn-x-share { background: #000; margin-top: 5px; } /* X用ボタン */
+        .btn-x-share { background: #000; margin-top: 5px; }
         
         .view-toggle-box { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
         .view-btn { background: transparent; border: 2px solid #aaa; color: #555; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 0 5px; touch-action: manipulation; }
@@ -133,14 +134,17 @@
         
         .song-list-box { text-align: left; margin: 10px 0; padding-left: 20px; font-weight: bold; color: #555; font-size: 0.9rem;}
         .song-list-item { margin-bottom: 5px; }
-
-        /* --- 連絡用表示スタイル --- */
+        
+        /* 連絡用表示スタイル */
         .instruction-box { 
             background: #e3f2fd; border: 2px solid #2196f3; padding: 15px; border-radius: 10px; 
             font-size: 0.9rem; color: #0d47a1; margin-bottom: 15px; text-align: left; 
+            line-height: 1.6;
+            /* ユーザーがコピーできるように選択可能にする */
+            user-select: text; -webkit-user-select: text;
         }
         .role-badge {
-            display: inline-block; padding: 5px 10px; border-radius: 5px; color: white; font-weight: bold; margin-bottom: 5px;
+            display: inline-block; padding: 5px 10px; border-radius: 5px; color: white; font-weight: bold; margin-bottom: 8px;
         }
         .role-host { background: #e91e63; } /* 赤 */
         .role-guest { background: #2196f3; } /* 青 */
@@ -388,8 +392,12 @@
 
         // ★★★ 別ファイルから曲リストを読み込む場合はここに import 文を書く ★★★
         const songDatabase = {
-            'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
-            'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
+            'normal': [
+                "アムピト◇リーテー","ouroboros -twin stroke of the end-","χ談","カラフル","彼は誰時の誘惑（裏）","ココドコ？多分ドッカ島！（裏）","コネクトカラーズ","GORI × GORI × SafaRI（裏）","万戈イム－一ノ十","青天の黎明","Central Dogma Pt.2","Taiko Drum Monster（表）","DEBSTEP!","Dreadnought（裏）","Don't Stop the Game","HARDCOREノ心得","幕末維新譚","†バチ!ムチ!?マッスルキングダム†","Hello, Worldooon!!（裏）","パン vs ごはん！ 大決戦！（裏）[達人]","ピッチフェイダ（裏）","for Q（裏）","プチポチ","Behemoth","まるくてはやくてすさまじいリズム","モノクロームユートピア","ラパスの虹（裏）","赤と白薔薇の魔女","あめふりのロンド（裏）","ON SAY GO SAY（裏）","カルメン組曲 一番終曲（裏）","森羅万象[開幕達人]","双竜ノ乱（裏）【双打】","デッド・オア・ダイ","23時54分、陽の旅路へのプレリュード（表）","にゃーにゃーにゃー","メタナイトの逆襲メドレー（裏）","8OROCHI（裏）","哀 want U","蒼鷺之火（裏）","或ル不和","VERTeX","美しく忙しきドナウ（裏）","ウルトラマンX（裏）","郢曲／暁闇","Agent Hustle & Dr. Hassle（表）","GERBERA","雲間を游ぐ","The Future of the 太鼓ドラム（表）","SAVAGE DELIGHT","〆ドレー2000","重金属フューギティブ","Xevel","其方、激昂","超絶技巧系少女","テトラリュトモスフォビア","天泣の律","転生〈TENSEI〉-喜与志が待つ強者-（裏）","Toon Town's Toys' Tune","ナイトメア・サバイバー（裏）","BATTLE NO.1[達人]","Honey Heartbeat ～10 Stars Mix～（裏）","Parousia","パン vs ごはん！ 大決戦！（表）[達人]","vs.VIGVANGS（表）","Mood Swing（裏）","もぺもぺ","螺旋周回軌道（裏）","LECIEL GLISSANDO","LUNATiC CiRCUiT","冷凍庫CJ ～嗚呼面太鼓ブラザーズ～","ARMAGEΔDON","Unwelcome School (MRM REMIX)（裏）","Irregular Clock（裏）","EterNal Ring","懐中庭園を持つ少女","絡繰廻廊","Caribbean Knight","GIGALODOON（裏）","鼓立あおはる学園校歌","束ね糸","チルノのパーフェクトさんすう教室➈周年バージョン（裏）","儚姫は原初に舞う（裏）","ひよこ鑑定士さん","FLOWER（裏）","BLAZING VORTEX（裏）","Player's High","ANiMA","Altale（裏）","Aleph-0","UNDEAD HEART(怒りのWarriors)","イオシス秋の爆食祭2024","怒槌","Valsqotch","OK I’m blue rat","KAGEKIYO（裏）","CUT! into the FUTURE（表）","極圏","沓の子を打つ（裏）","クラポルポルスカ","Groovy Duel","Goldfish City","Got more raves?（裏）","秋竜 ～Shiuryu～（裏）","疾風怒濤（表）","承認欲Q","Singularity Game","晨星ト鵺","SUPERNOVA（裏）","Stick Trick ShowTime!!","閃光天舞","SoulStone -闇喰イサァカス団-","SORA-VII シグナスウォール","月読命","電脳幻夜の星言詠","トイマチック☆パレード!!","Doom Noiz","Hello, Mr.JOKER","人のお金で焼肉を食したい！（裏）","FUJIN Rumble","Help me, さいたま2000!!","またさいたま2000","三瀬川乱舞（裏）","メカデス。（裏）","めためた☆ゆにば～すっ！（裏）","モノクロボイス（表）","Re：End of a Dream（裏）","竜と黒炎の姫君（裏）","練習曲Op.10-4（裏）","Rotter Tarmination（裏）","六本の薔薇と采の歌（裏）","What's in the box?","あなたとトゥラッタッタ♪（裏）","Aragami","案山子姫 -Princess Scarecrow-（裏）","Garakuta Doll Play（裏）","カラフルボイス（裏）","Calculator","気焔万丈神楽","Kill My Fortune（裏）","ゲゲゲの鬼太郎（裏）","刻竜 ～Kokuryu～（表）","神竜 ～Shinryu～（表）","Scarlet Lance","星河一天","憎悪と醜悪の花束（表）","Destr0yer（裏）","ドドドドドンだフル！（裏）","はたラク2000","Vixtory（表）","秘ナルメジェドノ悲ナル憂鬱","メタルホーク BGM1","memoria ficta","燎原ノ舞","愛と浄罪の森","アサガオ","Abyss of hell（裏）","天照","Ignis Danse","Illusion Flare","うちゅうひこうし冒険譚","ex寅 Trap!!","Evidence of evil","カラ鞠の花","ギガンティックO.T.N（裏）","きゅうくらりん（裏）","共奏鼓祭（裏）","Chronomia","弧","ゴーストマスク","ゴッドソング（裏）","God Ray","鼓舞曲「閻魔」","潮騒205号SSS線","紫煌ノ乱","蛇鉄","須佐之男","Spectral Rider","Soulway（達人）","D's Adventure Note","D絶対！SAMURAIインザレイン（裏）","Telecastic fake show","てんぢく2000","弩蚊怒夏","とける（表）","Dogbite","Doppelgangers（裏）","白鳥の湖～still a duckling～（裏）","ハンロック","平等院鳳凰ドン vs 鳥獣戯カッ（裏）","ヘイラ（裏）","ヘイラ（にじさんじVer.）（裏）","ペットショップ大戦","MagiCatz","ミュージック・リボルバー（裏）","YOU're your HERO","六華の舞","wonderful ROUTINE","あの日出会えたキセキ","アンリミテッドゲームズ（表）","ギミチョコ!!（裏）","Gloria","濃紅","濃紅（にじさんじVer.）","ココロボ","Central Dogma Pt.1（表）","夏祭り / ジッタリン・ジン（裏）","Purple Rose Fusion","みんなのうた","MEGALOVANIA（裏）","4+1のそれぞれの未来","Lightning Boys（表）","アキバ20XX","Aloft in the wind（裏）","イガク（裏）","頂","INSPION","ウィーアー！（裏）","waitin' for u","Angel Halo","オーバード（裏）","オーブの祈り","Oshama Scramble!（裏）","GIGALODOON（表）","きたさいたま2000","キャラメル・ジャンキヰ","Surf Zapping","Silent Jealousy（裏）","セイクリッド ルイン（裏）","零の交響曲（裏）","そつおめしき2ばん","十露盤2000","Diving Drive","ダンガンノーツ（表）","天下統一録","ドドンガド～ン（裏）","No Gravity","ノるどん2000","VICTORIA","ピコピコ ルイン（裏）","VIVIVIVID","FREEDOM DiVE↓","Venomous（裏）","星屑ストラック（表）","8OROCHI（表）","YOAKE","夜桜謝肉祭（裏）","ラヴ♡スパイス♡ライクユー!!!","Libera Ray","詩謳兎揺蕩兎","Extreme End","Emma（裏）[普通]","Garakuta Doll Play（裏）【双打】","ゴーゴー・キッチン（裏）","最終鬼畜妹フランドール・S","タイコタイム（裏）","乱数調整のリバースシンデレラ（裏）","R.I.","蒼の旋律（裏）","朱の旋律","EkiBEN2000","Kamikaze Remix","Calamity Fortune（表）","キューティー☆デモニック☆魔人エモ!!","【双打】紅（裏）","さちさちにしてあげる♪（裏）","スーパーD＆D ～完全にリードしてアイマイミー～","SUPERNOVA（表）","SstTAarR*","Soulway（開幕普通）","タイコロール","タベルナ2000","儚姫は原初に舞う（表）","BATTLE NO.1[玄人]","ヒバナ（裏）","Blessed Bouquet Buskers","よーいドン！","そつおめしき","初音ミクの激唱（表）","初音ミクの激唱（裏）","パン vs ごはん！ 大決戦！（表）[普通]","パン vs ごはん！ 大決戦！（裏）[普通]","Black Rose Apostle（表）","Black Rose Apostle（裏）","マツヨイナイトバグ（裏）","X-DAY2000","KAGEKIYO（裏）【双打】","Clotho クロートー","旋風ノ舞【天】（表）","旋風ノ舞【天】（裏）","チルノのパーフェクトさんすう教室（裏）","ネクロファンタジア ～ Arr.Demetori","拝啓ドッペルゲンガー","BATTLE NO.1[普通]","mint tears"
+            ],
+            'hard': [
+                "Infinite Rebellion","彁（裏）","CRUXNAUT","The Future of the 太鼓ドラム（裏）","神竜 ～Shinryu～（裏）","憎悪と醜悪の花束（裏）","ダーク・エクス・マキナ♡","第六天魔王（表）","第六天魔王（裏）","ダンガンノーツ（裏）","Destination 2F29","ドンカマ2000","23時54分、陽の旅路へのプレリュード（裏）","Vixtory（裏）","vs.VIGVANGS（裏）","poxei♦DOON","幽玄ノ乱","!!!カオスタイム!!!","†††カオスタイム the DARK†††","Calamity Fortune（裏）","業 -善なる神とこの世の悪について-（裏）","最果の魔法使い（裏）","siren's eye","疾風怒濤（裏）","Central Dogma Pt.1（裏）","魑魅魍魎","とける（裏）","トロいか2000","ラ・モレーナ・クモナイ（裏）","アンリミテッドゲームズ（裏）","Emma（裏）[達人]","CUT! into the FUTURE（裏）","刻竜 ～Kokuryu～（裏）","!!!チルノのパーフェクトさんすうタイム!!!","まださいたま2000","4+1のそれぞれの未来（裏）[達人]","4+1のそれぞれの未来（裏）[玄人]","4+1のそれぞれの未来（裏）[普通]","オペレート・ミー（裏）","彁（表）","仮想現実のテレスコープ（裏）","Coquette","Synthesis.（裏）","スーハー2000","続・〆ドレー2000","そして勇者は眠りにつく（裏）","Taiko Drum Monster（裏）","Challengers","≠ＭＭ","Hurtling Boys","初音ミクの消失‐劇場版‐（裏）","星屑ストラック（裏）","Lightning Boys（裏）","Lδchesis（裏）","λ7708","わら得る2000","Xa（裏）","狂瀾怒濤（裏）","氷竜～Kooryu～（裏）","Genesis Ray（裏）","双竜ノ乱","たいこの2000","チャーリーダッシュ！","Nosferatu（裏）","POLARiSNAUT","モノクロボイス（裏）","UFO Swingin'"
+            ]
         };
 
         const requestWakeLock = async () => {
@@ -434,9 +442,11 @@
             if(el) el.addEventListener('click', func);
         };
 
-        // ★ ログイン系 (Popupに戻す)
+        // ★ ログイン系 (Popup)
         bindBtn('btn-login-google', () => {
-            signInWithPopup(auth, new GoogleAuthProvider())
+            const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            signInWithPopup(auth, provider)
             .catch(e => alert("ログインエラー:\n" + e.message));
         });
         
@@ -462,6 +472,14 @@
                 location.reload();
             }
         };
+
+        // ★リダイレクトログインの結果を確認
+        getRedirectResult(auth).catch((error) => {
+            console.error("Redirect login error:", error);
+            if (error.code !== 'auth/popup-closed-by-user') {
+                alert("ログインに失敗しました。\n" + error.message);
+            }
+        });
 
         onAuthStateChanged(auth, async (user) => {
             if(user) {
@@ -566,6 +584,7 @@
             switchScreen('matching-screen');
             document.getElementById('match-status').innerText = "対戦相手を待っています...";
             try {
+                // 安全マージン: 60秒以上経過した古いデータを削除
                 const q = query(collection(db, "waiting_room"), where("mode", "==", mode), limit(20));
                 const snap = await getDocs(q);
                 let opponentDoc = null;
@@ -580,17 +599,20 @@
                 }
 
                 if(opponentDoc) {
+                    // ★ 順番変更: 先に部屋を作る！
                     const opp = opponentDoc.data();
-                    // ★ 8桁の数字ID生成
-                    const matchId = Math.floor(10000000 + Math.random() * 90000000).toString();
                     
+                    // 8桁の数字ID生成
+                    const matchId = Math.floor(10000000 + Math.random() * 90000000).toString();
+
                     const roomRef = await addDoc(collection(db, "rooms"), {
                         mode: mode, songs: pickRandomSongs(mode), createdAt: new Date(),
-                        matchId: matchId, // 保存
+                        matchId: matchId,
                         player1: { uid: opp.uid, xId: opp.xId, displayName: opp.displayName, rate: opp.rate, result: null, lastSeen: Date.now() },
                         player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, rate: userData.rate, result: null, lastSeen: Date.now() }
                     });
                     
+                    // その後に削除
                     await deleteDoc(doc(db, "waiting_room", opponentDoc.id));
 
                     localStorage.setItem('current_room_id', roomRef.id);
@@ -610,8 +632,10 @@
                             if(unsubscribeRoom) unsubscribeRoom();
                             unsubscribeRoom = null;
                             
+                            // ★ 念のための最終確認: 自分のIDの部屋ができていないか？
                             const me1 = await getDocs(query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid)));
                             if(!me1.empty) {
+                                // 部屋発見！キャンセル中止
                                 const roomDoc = me1.docs[0];
                                 waitingDocId = null; 
                                 localStorage.setItem('current_room_id', roomDoc.id);
@@ -626,7 +650,7 @@
                             switchScreen('title-screen');
                             alert("【タイムアウト】\n一定時間マッチングしなかったため、\n自動キャンセルしました。");
                         }
-                    }, 60000); 
+                    }, 60000); // 60秒待機
 
                     const roomQ = query(collection(db, "rooms"), where("player1.uid", "==", currentUser.uid));
                     unsubscribeRoom = onSnapshot(roomQ, snap => {
@@ -676,6 +700,7 @@
                 
                 currentMatchData = { me, opponent, songs: data.songs, isP1, createdAt: data.createdAt, matchId: data.matchId };
 
+                // 切断検知 (780秒 = 13分)
                 const now = Date.now();
                 if (opponent.lastSeen && (now - opponent.lastSeen > 780000)) { 
                     deleteDoc(doc(db, "rooms", roomId)).catch(()=>{});
@@ -733,7 +758,7 @@
             document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
             document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
             
-            // ★ HOST/GUEST 表示分けロジック
+            // HOST/GUEST 表示分け
             const isHost = currentMatchData.isP1; // Player1がHOST
             const matchId = currentMatchData.matchId || "--------";
             const instructionArea = document.getElementById('instruction-area');
@@ -743,17 +768,41 @@
                 const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
                 instructionArea.innerHTML = `
                     <span class="role-badge role-host">HOST (募集)</span>
-                    <p>あなたは<strong>ホスト</strong>です。<br>下のボタンを押して対戦番号をツイートし、<br>相手からのリプライを待ってください。</p>
-                    <div style="margin-top:10px; font-weight:bold; font-size:1.2rem; letter-spacing:2px; color:#333;">${matchId}</div>
+                    <p><strong>1分以内</strong>に以下のボタンからツイートしてください。</p>
+                    <div style="margin:10px 0; font-weight:bold; color:#333; background:#fff; padding:5px; border-radius:4px;">
+                        @1 対戦番号${matchId}
+                    </div>
                     <a href="${url}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white; margin-top:10px;">ツイートする</a>
+                    <p style="font-size:0.8rem; color:#d32f2f; margin-top:10px;">
+                        ※1〜2分待っても返信が来ない場合は、<br>一番下の「退出する」ボタンを押してください。
+                    </p>
                 `;
             } else {
-                const searchUrl = `https://twitter.com/search?q=${matchId}&f=live`;
+                // IDから @ を除去
+                const cleanId = currentMatchData.opponent.xId ? currentMatchData.opponent.xId.replace('@', '') : '';
+                const profileUrl = `https://twitter.com/${cleanId}`;
+                const searchText = `@1 対戦番号${matchId}`;
+                const searchUrl = `https://twitter.com/search?q=${encodeURIComponent(searchText)}&f=live`;
+
                 instructionArea.innerHTML = `
                     <span class="role-badge role-guest">GUEST (参加)</span>
-                    <p>あなたは<strong>ゲスト</strong>です。<br>下のボタンから相手のツイートを検索し、<br>「よろしくお願いします！」とリプライしてください。</p>
-                    <div style="margin-top:10px; font-weight:bold; font-size:1.2rem; letter-spacing:2px; color:#333;">${matchId}</div>
-                    <a href="${searchUrl}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white; margin-top:10px;">Xで検索する</a>
+                    <p>相手のプロフィールに飛び、ツイートを探してください。</p>
+                    <p style="color:#d32f2f; font-weight:bold; background:#fff; padding:5px; border-radius:4px; margin:10px 0;">
+                        ⚠️必ず「返信」欄を見てください！<br>
+                        <span style="font-size:0.8rem; font-weight:normal;">(@1 ツイートは通常のポスト欄には表示されません)</span>
+                    </p>
+                    <a href="${profileUrl}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white;">相手のXプロフィールへ</a>
+                    
+                    <div style="margin-top:15px; padding:10px; background:#fff3e0; border-radius:8px; font-size:0.85rem;">
+                        <strong>どうしても見つからない場合</strong><br>
+                        以下の文言で検索してみてください。<br>
+                        <div style="font-weight:bold; margin:5px 0; user-select:all; -webkit-user-select:all;">${searchText}</div>
+                        <a href="${searchUrl}" target="_blank" style="color:#e65100; text-decoration:underline;">ここを押して検索する</a>
+                    </div>
+
+                    <p style="font-size:0.8rem; color:#d32f2f; margin-top:10px;">
+                        ※それでも見つからない、反応がない場合は、<br>一番下の「退出する」ボタンを押してください。
+                    </p>
                 `;
             }
 
