@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>太鼓ランダムマッチ</title>
+    <title>太鼓ウデマエマッチ</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;900&display=swap" rel="stylesheet">
     <style>
         /* --- 基本リセット --- */
@@ -103,7 +103,7 @@
             background: #333; color: white; padding: 15px; border-radius: 12px;
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 20px; box-shadow: 0 4px 0 #000;
-            flex-wrap: wrap; /* メーターのために折り返し許可 */
+            flex-wrap: wrap;
         }
         .profile-info-left { text-align: left; }
         .profile-name { font-size: 0.9rem; }
@@ -126,19 +126,17 @@
         }
         .meter-fill {
             height: 100%;
-            width: 0%; /* JSで制御 */
+            width: 0%;
             background: linear-gradient(90deg, #ffeb3b, #fbc02d);
             transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
             box-shadow: 0 0 10px #ffeb3b;
         }
-        /* メーターの区切り線 (任意) */
         .meter-line {
             position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.3);
         }
         .profile-point-text {
             font-size: 0.8rem; color: #ffeb3b; text-align: right; margin-top: 2px; font-weight: bold;
         }
-
 
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .menu-btn { height: 70px; font-size: 0.85rem; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 0; }
@@ -151,11 +149,10 @@
         .rank-2 { color: #a0a0a0; font-weight: bold; }
         .rank-3 { color: #cd7f32; font-weight: bold; }
         
-        /* ウデマエの色 */
-        .udemae-S { color: #ffd700; text-shadow: 0 0 5px #ff6f00; } /* S, S+ */
-        .udemae-A { color: #e91e63; } /* A帯 */
-        .udemae-B { color: #2196f3; } /* B帯 */
-        .udemae-C { color: #4caf50; } /* C帯 */
+        .udemae-S { color: #ffd700; text-shadow: 0 0 5px #ff6f00; }
+        .udemae-A { color: #e91e63; }
+        .udemae-B { color: #2196f3; }
+        .udemae-C { color: #4caf50; }
 
         .screen { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; }
         .screen.active { display: flex; }
@@ -175,7 +172,6 @@
         .song-list-box { text-align: left; margin: 10px 0; padding-left: 20px; font-weight: bold; color: #555; font-size: 0.9rem;}
         .song-list-item { margin-bottom: 5px; }
         
-        /* 連絡用表示スタイル */
         .instruction-box { 
             background: #e3f2fd; border: 2px solid #2196f3; padding: 15px; border-radius: 10px; 
             font-size: 0.9rem; color: #0d47a1; margin-bottom: 15px; text-align: left; 
@@ -206,12 +202,27 @@
         .rate-box { background: #222; color: #fff; padding: 15px 30px; border-radius: 10px; display: inline-block; margin-top: 20px; box-shadow: inset 0 0 10px #000; position: relative; min-width: 200px; }
         .rate-value { font-size: 3.5rem; font-weight: 900; color: #ffd700; line-height: 1; }
         .rate-sub { font-size: 1.2rem; color: #ccc; margin-top: 5px; display: block; }
-        .rate-diff { font-size: 1.2rem; position: absolute; top: -15px; right: -10px; background: #ff5722; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold; opacity: 0; transition: all 0.5s ease 1s; transform: translateY(10px); }
+        
+        /* 増減値のスタイル調整 */
+        .rate-diff { 
+            font-size: 1.4rem; 
+            position: absolute; 
+            top: -20px; 
+            right: -15px; 
+            background: #ff5722; 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+            font-weight: 900; 
+            opacity: 0; 
+            transition: all 0.5s ease 1s; 
+            transform: translateY(10px); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
         .rate-diff.show { opacity: 1; transform: translateY(0); }
         .rate-diff.plus { background: #e91e63; }
         .rate-diff.minus { background: #2196f3; }
 
-        /* 昇格・降格演出用 */
         .rank-change-text { font-size: 1.5rem; font-weight: bold; margin-top: 10px; animation: popIn 0.5s; }
         .rank-up { color: #e91e63; text-shadow: 0 0 5px #fff; }
         .rank-down { color: #2196f3; }
@@ -335,6 +346,12 @@
             <h3>確認中...</h3>
             <p>相手の入力を待っています</p>
             <p style="font-size:0.8rem; color:red; margin-top:20px;">※13分以上応答がない場合、<br>自動でエラーとなり終了します。</p>
+            
+            <p style="font-size:0.85rem; margin-top:10px; font-weight:bold; color:#333;">
+                ⚠️画面が切り替わらない場合は<br>
+                <a href="javascript:location.reload()" style="color:#2196f3; text-decoration:underline;">ページを再読み込み</a> してください。
+            </p>
+
             <button class="btn btn-red" style="margin-top:30px; width: auto; padding-left: 30px; padding-right: 30px;" onclick="tryExitRoom()">退出する (無効試合)</button>
         </div>
 
@@ -499,15 +516,10 @@
         const RANKS = ["C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S", "S+"];
 
         const songDatabase = {
-            'normal': [
-                "アムピト◇リーテー","ouroboros -twin stroke of the end-","χ談","カラフル","彼は誰時の誘惑（裏）","ココドコ？多分ドッカ島！（裏）","コネクトカラーズ","GORI × GORI × SafaRI（裏）","万戈イム－一ノ十","青天の黎明","Central Dogma Pt.2","Taiko Drum Monster（表）","DEBSTEP!","Dreadnought（裏）","Don't Stop the Game","HARDCOREノ心得","幕末維新譚","†バチ!ムチ!?マッスルキングダム†","Hello, Worldooon!!（裏）","パン vs ごはん！ 大決戦！（裏）[達人]","ピッチフェイダ（裏）","for Q（裏）","プチポチ","Behemoth","まるくてはやくてすさまじいリズム","モノクロームユートピア","ラパスの虹（裏）","赤と白薔薇の魔女","あめふりのロンド（裏）","ON SAY GO SAY（裏）","カルメン組曲 一番終曲（裏）","森羅万象[開幕達人]","双竜ノ乱（裏）【双打】","デッド・オア・ダイ","23時54分、陽の旅路へのプレリュード（表）","にゃーにゃーにゃー","メタナイトの逆襲メドレー（裏）","8OROCHI（裏）","哀 want U","蒼鷺之火（裏）","或ル不和","VERTeX","美しく忙しきドナウ（裏）","ウルトラマンX（裏）","郢曲／暁闇","Agent Hustle & Dr. Hassle（表）","GERBERA","雲間を游ぐ","The Future of the 太鼓ドラム（表）","SAVAGE DELIGHT","〆ドレー2000","重金属フューギティブ","Xevel","其方、激昂","超絶技巧系少女","テトラリュトモスフォビア","天泣の律","転生〈TENSEI〉-喜与志が待つ強者-（裏）","Toon Town's Toys' Tune","ナイトメア・サバイバー（裏）","BATTLE NO.1[達人]","Honey Heartbeat ～10 Stars Mix～（裏）","Parousia","パン vs ごはん！ 大決戦！（表）[達人]","vs.VIGVANGS（表）","Mood Swing（裏）","もぺもぺ","螺旋周回軌道（裏）","LECIEL GLISSANDO","LUNATiC CiRCUiT","冷凍庫CJ ～嗚呼面太鼓ブラザーズ～","ARMAGEΔDON","Unwelcome School (MRM REMIX)（裏）","Irregular Clock（裏）","EterNal Ring","懐中庭園を持つ少女","絡繰廻廊","Caribbean Knight","GIGALODOON（裏）","鼓立あおはる学園校歌","束ね糸","チルノのパーフェクトさんすう教室➈周年バージョン（裏）","儚姫は原初に舞う（裏）","ひよこ鑑定士さん","FLOWER（裏）","BLAZING VORTEX（裏）","Player's High","ANiMA","Altale（裏）","Aleph-0","UNDEAD HEART(怒りのWarriors)","イオシス秋の爆食祭2024","怒槌","Valsqotch","OK I’m blue rat","KAGEKIYO（裏）","CUT! into the FUTURE（表）","極圏","沓の子を打つ（裏）","クラポルポルスカ","Goldfish City","Got more raves?（裏）","秋竜 ～Shiuryu～（裏）","疾風怒濤（表）","承認欲Q","Singularity Game","晨星ト鵺","SUPERNOVA（裏）","Stick Trick ShowTime!!","閃光天舞","SoulStone -闇喰イサァカス団-","SORA-VII シグナスウォール","月読命","電脳幻夜の星言詠","トイマチック☆パレード!!","Doom Noiz","Hello, Mr.JOKER","人のお金で焼肉を食したい！（裏）","FUJIN Rumble","Help me, さいたま2000!!","またさいたま2000","三瀬川乱舞（裏）","メカデス。（裏）","めためた☆ゆにば～すっ！（裏）","モノクロボイス（表）","Re：End of a Dream（裏）","竜と黒炎の姫君（裏）","練習曲Op.10-4（裏）","Rotter Tarmination（裏）","六本の薔薇と采の歌（裏）","What's in the box?","あなたとトゥラッタッタ♪（裏）","Aragami","案山子姫 -Princess Scarecrow-（裏）","Garakuta Doll Play（裏）","カラフルボイス（裏）","Calculator","気焔万丈神楽","Kill My Fortune（裏）","ゲゲゲの鬼太郎（裏）","刻竜 ～Kokuryu～（表）","神竜 ～Shinryu～（表）","Scarlet Lance","星河一天","憎悪と醜悪の花束（表）","Destr0yer（裏）","ドドドドドンだフル！（裏）","はたラク2000","Vixtory（表）","秘ナルメジェドノ悲ナル憂鬱","メタルホーク BGM1","memoria ficta","燎原ノ舞","愛と浄罪の森","アサガオ","Abyss of hell（裏）","天照","Ignis Danse","Illusion Flare","うちゅうひこうし冒険譚","ex寅 Trap!!","Evidence of evil","カラ鞠の花","ギガンティックO.T.N（裏）","きゅうくらりん（裏）","共奏鼓祭（裏）","Chronomia","弧","ゴーストマスク","ゴッドソング（裏）","God Ray","鼓舞曲「閻魔」","潮騒205号SSS線","紫煌ノ乱","蛇鉄","須佐之男","Spectral Rider","Soulway（達人）","D's Adventure Note","D絶対！SAMURAIインザレイン（裏）","てんぢく2000","弩蚊怒夏","とける（表）","Dogbite","Doppelgangers（裏）","白鳥の湖～still a duckling～（裏）","ハンロック","平等院鳳凰ドン vs 鳥獣戯カッ（裏）","ヘイラ（裏）","ヘイラ（にじさんじVer.）（裏）","ペットショップ大戦","MagiCatz","ミュージック・リボルバー（裏）","YOU're your HERO","六華の舞","wonderful ROUTINE","あの日出会えたキセキ","アンリミテッドゲームズ（表）","Gloria","濃紅","濃紅（にじさんじVer.）","ココロボ","Central Dogma Pt.1（表）","夏祭り / ジッタリン・ジン（裏）","Purple Rose Fusion","みんなのうた","MEGALOVANIA（裏）","4+1のそれぞれの未来","Lightning Boys（表）","アキバ20XX","Aloft in the wind（裏）","イガク（裏）","頂","INSPION","ウィーアー！（裏）","waitin' for u","Angel Halo","オーバード（裏）","オーブの祈り","Oshama Scramble!（裏）","GIGALODOON（表）","きたさいたま2000","キャラメル・ジャンキヰ","Surf Zapping","Silent Jealousy（裏）","セイクリッド ルイン（裏）","零の交響曲（裏）","そつおめしき2ばん","十露盤2000","Diving Drive","ダンガンノーツ（表）","天下統一録","ドドンガド～ン（裏）","No Gravity","ノるどん2000","VICTORIA","ピコピコ ルイン（裏）","VIVIVIVID","FREEDOM DiVE↓","Venomous（裏）","星屑ストラック（表）","8OROCHI（表）","YOAKE","夜桜謝肉祭（裏）","ラヴ♡スパイス♡ライクユー!!!","Libera Ray","詩謳兎揺蕩兎","Extreme End","Emma（裏）[普通]","Garakuta Doll Play（裏）【双打】","ゴーゴー・キッチン（裏）","最終鬼畜妹フランドール・S","タイコタイム（裏）","乱数調整のリバースシンデレラ（裏）","R.I.","蒼の旋律（裏）","朱の旋律","EkiBEN2000","Kamikaze Remix","Calamity Fortune（表）","キューティー☆デモニック☆魔人エモ!!","【双打】紅（裏）","さちさちにしてあげる♪（裏）","スーパーD＆D ～完全にリードしてアイマイミー～","SUPERNOVA（表）","SstTAarR*","Soulway（開幕普通）","タイコロール","タベルナ2000","儚姫は原初に舞う（表）","BATTLE NO.1[玄人]","ヒバナ（裏）","Blessed Bouquet Buskers","よーいドン！","そつおめしき","初音ミクの激唱（表）","初音ミクの激唱（裏）","パン vs ごはん！ 大決戦！（表）[普通]","パン vs ごはん！ 大決戦！（裏）[普通]","Black Rose Apostle（表）","Black Rose Apostle（裏）","マツヨイナイトバグ（裏）","X-DAY2000","KAGEKIYO（裏）【双打】","Clotho クロートー","旋風ノ舞【天】（表）","旋風ノ舞【天】（裏）","チルノのパーフェクトさんすう教室（裏）","ネクロファンタジア ～ Arr.Demetori","拝啓ドッペルゲンガー","BATTLE NO.1[普通]","mint tears"
-            ],
-            'hard': [
-                "Infinite Rebellion","彁（裏）","CRUXNAUT","The Future of the 太鼓ドラム（裏）","神竜 ～Shinryu～（裏）","憎悪と醜悪の花束（裏）","ダーク・エクス・マキナ♡","第六天魔王（表）","第六天魔王（裏）","ダンガンノーツ（裏）","Destination 2F29","ドンカマ2000","23時54分、陽の旅路へのプレリュード（裏）","Vixtory（裏）","vs.VIGVANGS（裏）","poxei♦DOON","幽玄ノ乱","!!!カオスタイム!!!","†††カオスタイム the DARK†††","Calamity Fortune（裏）","業 -善なる神とこの世の悪について-（裏）","最果の魔法使い（裏）","siren's eye","疾風怒濤（裏）","Central Dogma Pt.1（裏）","魑魅魍魎","とける（裏）","トロいか2000","ラ・モレーナ・クモナイ（裏）","アンリミテッドゲームズ（裏）","Emma（裏）[達人]","CUT! into the FUTURE（裏）","刻竜 ～Kokuryu～（裏）","!!!チルノのパーフェクトさんすうタイム!!!","まださいたま2000","4+1のそれぞれの未来（裏）[達人]","4+1のそれぞれの未来（裏）[玄人]","4+1のそれぞれの未来（裏）[普通]","オペレート・ミー（裏）","彁（表）","仮想現実のテレスコープ（裏）","Coquette","Synthesis.（裏）","スーハー2000","続・〆ドレー2000","そして勇者は眠りにつく（裏）","Taiko Drum Monster（裏）","Challengers","≠ＭＭ","Hurtling Boys","初音ミクの消失‐劇場版‐（裏）","星屑ストラック（裏）","Lightning Boys（裏）","Lδchesis（裏）","λ7708","わら得る2000","Xa（裏）","狂瀾怒濤（裏）","氷竜～Kooryu～（裏）","Genesis Ray（裏）","双竜ノ乱","たいこの2000","チャーリーダッシュ！","Nosferatu（裏）","POLARiSNAUT","モノクロボイス（裏）","UFO Swingin'"
-            ]
+            'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
+            'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
         };
 
-        // --- ウデマエ計算ロジック ---
         const getRankName = (idx) => RANKS[idx] || "C-";
         const getRankColorClass = (idx) => {
             const name = getRankName(idx);
@@ -517,12 +529,11 @@
             return 'udemae-C';
         };
         
-        // ランクごとの基礎点設定
         const getBasePoint = (rankName) => {
-            if (rankName.startsWith('S')) return { win: 5, lose: 5 }; // S, S+
+            if (rankName.startsWith('S')) return { win: 5, lose: 5 }; 
             if (rankName.startsWith('A')) return { win: 12, lose: 10 };
             if (rankName.startsWith('B')) return { win: 15, lose: 10 };
-            return { win: 20, lose: 10 }; // C帯
+            return { win: 20, lose: 10 }; 
         };
 
         const requestWakeLock = async () => {
@@ -637,14 +648,12 @@
             const rankName = getRankName(userData.rankIndex);
             const point = userData.rankPoint;
             const el = document.getElementById('display-rank');
-            const pointEl = document.getElementById('display-point'); // 追加: 数値表示用
             const meterBar = document.getElementById('display-meter-bar');
             const meterText = document.getElementById('display-meter-text');
             
             el.innerText = rankName;
             el.className = `profile-udemae ${getRankColorClass(userData.rankIndex)}`;
             
-            // メーター更新
             const percentage = Math.min(100, Math.max(0, point));
             meterBar.style.width = `${percentage}%`;
             meterText.innerText = `${point} / 99`;
@@ -989,7 +998,6 @@
             } catch(e) { console.error(e); switchScreen('report-screen'); }
         };
 
-        // ★★★ ウデマエ計算ロジック実装 ★★★
         const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
@@ -1005,7 +1013,6 @@
                 if(heartbeatTimer) clearInterval(heartbeatTimer);
                 if(wakeLock) wakeLock.release().catch(()=>{});
                 
-                // 現在のランクとポイント取得
                 let currentIdx = userData.rankIndex !== undefined ? userData.rankIndex : 0;
                 let currentPt = userData.rankPoint !== undefined ? userData.rankPoint : 30;
                 const currentRankName = getRankName(currentIdx);
@@ -1013,37 +1020,31 @@
                 let gain = 0;
                 let isRankUp = false;
                 let isRankDown = false;
-                
-                // 基礎点取得
                 const base = getBasePoint(currentRankName);
-                
-                // ランダム変動 (-1, 0, +1 の揺らぎ)
                 const fluctuation = Math.floor(Math.random() * 3) - 1;
 
                 if (myRes === 'WIN') {
                     gain = base.win + fluctuation;
                     currentPt += gain;
-                    // 昇格判定
                     if (currentPt > 99) {
                         if (currentIdx < RANKS.length - 1) {
                             currentIdx++; 
                             currentPt = 30; 
                             isRankUp = true;
                         } else {
-                            currentPt = 99; // カンスト
+                            currentPt = 99; 
                         }
                     }
                 } else if (myRes === 'LOSE') {
-                    gain = -(base.lose + fluctuation); // 負けはマイナス
-                    currentPt += gain; // gainがマイナスなので足す
-                    // 降格判定
+                    gain = -(base.lose + fluctuation);
+                    currentPt += gain; 
                     if (currentPt < 0) {
                         if (currentIdx > 0) {
                             currentIdx--; 
                             currentPt = 70; 
                             isRankDown = true;
                         } else {
-                            currentPt = 0; // C-下限
+                            currentPt = 0; 
                         }
                     }
                 } else {
@@ -1148,13 +1149,12 @@
 
             const rateValEl = document.getElementById('anim-rank-val');
             const rateSubEl = document.getElementById('anim-point-val');
-            const meterBar = document.getElementById('anim-meter-bar'); // 結果画面用メーター
+            const meterBar = document.getElementById('anim-meter-bar');
 
             rateValEl.innerText = getRankName(userData.rankIndex);
             rateValEl.className = `rate-value ${getRankColorClass(userData.rankIndex)}`;
             rateSubEl.innerText = `${userData.rankPoint} / 99`;
             
-            // メーターアニメーション
             setTimeout(() => {
                 const percentage = Math.min(100, Math.max(0, userData.rankPoint));
                 meterBar.style.width = `${percentage}%`;
