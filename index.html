@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>太鼓レーティングマッチ</title>
+    <title>太鼓ランダムマッチ</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;900&display=swap" rel="stylesheet">
     <style>
         /* --- 基本リセット --- */
@@ -86,7 +86,7 @@
         .btn-orange { background: #ff5722; }
         .btn-blue { background: #2196f3; }
         .btn-green { background: #4caf50; }
-        .btn-teal { background: #009688; } /* ルールボタン用 */
+        .btn-teal { background: #009688; }
         .btn-gray { background: #757575; }
         .btn-red { background: #d32f2f; }
         .btn-x-share { background: #000; margin-top: 5px; }
@@ -100,30 +100,48 @@
         .btn-email { background: #607d8b; }
         
         .profile-bar {
-            background: #333; color: white; padding: 10px 15px; border-radius: 12px;
+            background: #333; color: white; padding: 15px; border-radius: 12px;
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 20px; box-shadow: 0 4px 0 #000;
+            flex-wrap: wrap; /* メーターのために折り返し許可 */
         }
-        .profile-name { font-size: 0.9rem; text-align: left; }
-        .profile-rate { color: #ffd700; font-size: 1.1rem; }
-        .settings-icon { cursor: pointer; font-size: 1.2rem; }
+        .profile-info-left { text-align: left; }
+        .profile-name { font-size: 0.9rem; }
+        .profile-udemae { font-size: 1.8rem; font-weight: 900; line-height: 1; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); margin-right: 5px;}
+        .settings-icon { cursor: pointer; font-size: 1.2rem; margin-left: 10px;}
 
-        /* メニューグリッド (3列に変更) */
-        .menu-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1fr; 
-            gap: 8px; 
-            margin-bottom: 20px; 
+        /* --- ウデマエメーター --- */
+        .meter-container {
+            width: 100%;
+            margin-top: 8px;
         }
-        .menu-btn { 
-            height: 70px; 
-            font-size: 0.85rem; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            margin-bottom: 0;
+        .meter-bg {
+            width: 100%;
+            height: 12px;
+            background: #555;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
         }
+        .meter-fill {
+            height: 100%;
+            width: 0%; /* JSで制御 */
+            background: linear-gradient(90deg, #ffeb3b, #fbc02d);
+            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 10px #ffeb3b;
+        }
+        /* メーターの区切り線 (任意) */
+        .meter-line {
+            position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.3);
+        }
+        .profile-point-text {
+            font-size: 0.8rem; color: #ffeb3b; text-align: right; margin-top: 2px; font-weight: bold;
+        }
+
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .menu-btn { height: 70px; font-size: 0.85rem; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 0; }
         .menu-btn span { font-size: 1.2rem; margin-bottom: 3px; }
         
         .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
@@ -132,6 +150,12 @@
         .rank-1 { color: #d4af37; font-weight: bold; font-size: 1.1rem; }
         .rank-2 { color: #a0a0a0; font-weight: bold; }
         .rank-3 { color: #cd7f32; font-weight: bold; }
+        
+        /* ウデマエの色 */
+        .udemae-S { color: #ffd700; text-shadow: 0 0 5px #ff6f00; } /* S, S+ */
+        .udemae-A { color: #e91e63; } /* A帯 */
+        .udemae-B { color: #2196f3; } /* B帯 */
+        .udemae-C { color: #4caf50; } /* C帯 */
 
         .screen { display: none; width: 100%; flex-direction: column; align-items: center; flex: 1; }
         .screen.active { display: flex; }
@@ -169,7 +193,6 @@
         }
         .highlight-text { color: #d32f2f; font-weight: bold; }
 
-        /* ルールモーダル用 */
         .rule-section { text-align: left; margin-bottom: 15px; font-size: 0.9rem; line-height: 1.5; }
         .rule-title { font-weight: bold; color: #ff5722; border-bottom: 2px solid #ffccbc; display: inline-block; margin-bottom: 5px; }
 
@@ -180,12 +203,18 @@
         .result-text-lose { font-size: 3rem; color: #5c6bc0; text-shadow: 2px 2px 0px #3949ab; animation: shake 0.5s; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
         @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateX(0); } }
-        .rate-box { background: #222; color: #fff; padding: 15px 30px; border-radius: 10px; display: inline-block; margin-top: 20px; box-shadow: inset 0 0 10px #000; position: relative; }
-        .rate-value { font-size: 2.5rem; font-weight: 900; font-variant-numeric: tabular-nums; color: #ffd700; }
+        .rate-box { background: #222; color: #fff; padding: 15px 30px; border-radius: 10px; display: inline-block; margin-top: 20px; box-shadow: inset 0 0 10px #000; position: relative; min-width: 200px; }
+        .rate-value { font-size: 3.5rem; font-weight: 900; color: #ffd700; line-height: 1; }
+        .rate-sub { font-size: 1.2rem; color: #ccc; margin-top: 5px; display: block; }
         .rate-diff { font-size: 1.2rem; position: absolute; top: -15px; right: -10px; background: #ff5722; color: white; padding: 2px 8px; border-radius: 5px; font-weight: bold; opacity: 0; transition: all 0.5s ease 1s; transform: translateY(10px); }
         .rate-diff.show { opacity: 1; transform: translateY(0); }
         .rate-diff.plus { background: #e91e63; }
         .rate-diff.minus { background: #2196f3; }
+
+        /* 昇格・降格演出用 */
+        .rank-change-text { font-size: 1.5rem; font-weight: bold; margin-top: 10px; animation: popIn 0.5s; }
+        .rank-up { color: #e91e63; text-shadow: 0 0 5px #fff; }
+        .rank-down { color: #2196f3; }
 
     </style>
 </head>
@@ -224,23 +253,36 @@
 
         <div id="title-screen" class="screen">
             <h1 class="title-logo">DON-DER MATCH</h1>
+            
             <div class="profile-bar">
-                <div>
-                    <div class="profile-name" id="display-name">Loading...</div>
-                    <div style="font-size:0.8rem; opacity:0.8;" id="display-xid">@未設定</div>
+                <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="profile-info-left">
+                        <div class="profile-name" id="display-name">Loading...</div>
+                        <div style="font-size:0.8rem; opacity:0.8;" id="display-xid">@未設定</div>
+                    </div>
+                    <div style="text-align:right; display:flex; align-items:center;">
+                        <div class="profile-udemae" id="display-rank">C-</div>
+                        <span class="settings-icon" onclick="openProfileModal()">⚙️</span>
+                    </div>
                 </div>
-                <div style="text-align:right;">
-                    <div class="profile-rate">Rate: <span id="display-rate">---</span></div>
-                    <span class="settings-icon" onclick="openProfileModal()">⚙️設定</span>
+                
+                <div class="meter-container">
+                    <div class="meter-bg">
+                        <div class="meter-fill" id="display-meter-bar"></div>
+                        <div class="meter-line" style="left:20%"></div>
+                        <div class="meter-line" style="left:40%"></div>
+                        <div class="meter-line" style="left:60%"></div>
+                        <div class="meter-line" style="left:80%"></div>
+                    </div>
+                    <div class="profile-point-text" id="display-meter-text">30 / 99</div>
                 </div>
             </div>
-            
+
             <div class="menu-grid">
                 <button id="btn-rules" class="btn btn-teal menu-btn"><span>📖</span>ルール</button>
                 <button class="btn btn-orange menu-btn" onclick="openRanking()"><span>🏆</span>ランキング</button>
                 <button class="btn btn-blue menu-btn" onclick="alert('履歴機能はまだ実装されていません')"><span>📜</span>対戦履歴</button>
             </div>
-
             <p style="font-weight:bold; margin-bottom:10px;">対戦難易度を選択</p>
             <button id="btn-mode-normal" class="btn btn-green">難易度 F ～ A+</button>
             <button id="btn-mode-hard" class="btn btn-orange">難易度 S ～ SS</button>
@@ -293,7 +335,6 @@
             <h3>確認中...</h3>
             <p>相手の入力を待っています</p>
             <p style="font-size:0.8rem; color:red; margin-top:20px;">※13分以上応答がない場合、<br>自動でエラーとなり終了します。</p>
-            
             <button class="btn btn-red" style="margin-top:30px; width: auto; padding-left: 30px; padding-right: 30px;" onclick="tryExitRoom()">退出する (無効試合)</button>
         </div>
 
@@ -301,10 +342,23 @@
             <div class="result-container">
                 <h1 id="final-title">WIN!</h1>
                 <p id="final-message" style="margin-bottom:15px; font-weight:bold;"></p>
+                
                 <div class="rate-box">
-                    <div class="rate-value" id="anim-rate-val">1500</div>
-                    <div class="rate-diff" id="anim-rate-diff">+20</div>
+                    <div class="rate-value" id="anim-rank-val">C-</div>
+                    <div class="meter-container" style="margin-top:15px;">
+                        <div class="meter-bg">
+                            <div class="meter-fill" id="anim-meter-bar"></div>
+                            <div class="meter-line" style="left:20%"></div>
+                            <div class="meter-line" style="left:40%"></div>
+                            <div class="meter-line" style="left:60%"></div>
+                            <div class="meter-line" style="left:80%"></div>
+                        </div>
+                        <div class="profile-point-text" id="anim-point-val">30 / 99</div>
+                    </div>
+                    <div class="rate-diff" id="anim-point-diff">+10</div>
                 </div>
+
+                <div id="rank-change-msg" class="rank-change-text"></div>
             </div>
             <button id="btn-return-title" class="btn btn-gray" style="margin-top:30px;">タイトルへ戻る</button>
         </div>
@@ -313,31 +367,24 @@
     <div id="rule-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:500px; max-height:80vh; overflow-y:auto; text-align:left;">
             <h3 style="text-align:center; margin-bottom:20px;">遊び方・ルール</h3>
-            
             <div class="rule-section">
                 <div class="rule-title">1. マッチングと役割</div>
-                <p>マッチングが成立すると、ランダムに<strong>HOST（ホスト）</strong>と<strong>GUEST（ゲスト）</strong>に分かれます。<br>
-                <strong>HOST:</strong> 対戦番号をツイートする係<br>
-                <strong>GUEST:</strong> そのツイートを検索してリプする係</p>
+                <p>マッチングが成立すると、ランダムに<strong>HOST（ホスト）</strong>と<strong>GUEST（ゲスト）</strong>に分かれます。<br>HOST: 対戦番号をツイートする係<br>GUEST: そのツイートを検索してリプする係</p>
             </div>
-
             <div class="rule-section">
                 <div class="rule-title">2. X (Twitter) でのやり取り</div>
-                <p>ホストのツイートに「よろしくお願いします！」とリプライし、そのツリー（返信欄）に<strong>お互いが1曲ずつリザルト画像を貼ってください。</strong></p>
+                <p>ホストのツイートに「よろしくお願いします！」とリプライし、そのツリーに<strong>お互いが1曲ずつリザルト画像を貼ってください。</strong></p>
             </div>
-
             <div class="rule-section">
                 <div class="rule-title">3. 勝敗条件</div>
-                <p>課題曲3曲の<strong>「良」の数の合計</strong>が多い方が勝利です。オプションは自由です。<br></p>
+                <p>課題曲3曲の<strong>「良」の数の合計</strong>が多い方が勝利です。<br>
+                (不可やコンボ数は関係ありません)<br>
+                <span style="color:#e91e63; font-weight:bold;">※オプション（ばいそく、あべこべ等）は自由です。</span></p>
             </div>
-
             <div class="rule-section">
-                <div class="rule-title">4. 注意事項</div>
-                <ul style="padding-left:20px; font-size:0.85rem;">
-                    <li>Xの通知が増えるのが嫌な方は、<strong>専用アカウントの作成を推奨</strong>します。</li>
-                </ul>
+                <div class="rule-title">4. ウデマエシステム</div>
+                <p>C-からS+までのランクがあります。勝つとポイントが増え、100ptを超えると昇格、0ptを割ると降格します。</p>
             </div>
-
             <div style="text-align:center; margin-top:20px;">
                 <button class="btn btn-gray" onclick="closeModal('rule-modal')">閉じる</button>
             </div>
@@ -365,10 +412,10 @@
 
     <div id="ranking-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:450px;">
-            <h3>ランキング</h3>
+            <h3>ウデマエランキング</h3>
             <div style="max-height:300px; overflow-y:auto;">
                 <table class="rank-table">
-                    <thead><tr><th>順位</th><th>名前</th><th>レート</th></tr></thead>
+                    <thead><tr><th>順位</th><th>名前</th><th>ウデマエ</th><th>pt</th></tr></thead>
                     <tbody id="ranking-list"></tbody>
                 </table>
             </div>
@@ -422,8 +469,7 @@
         import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, updateDoc, limit, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ★★★ APIキーを貼り付けてください ★★★
-        const firebaseConfig =  {
+        const firebaseConfig = {
   apiKey: "AIzaSyBU1LAF6ceIsezKarsiecSTbH87Cb3gnTw",
   authDomain: "taikorating.firebaseapp.com",
   projectId: "taikorating",
@@ -433,12 +479,13 @@
   measurementId: "G-PJXEXL5E9M"
 };
 
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         let currentUser = null;
-        let userData = { displayName: "名無し", xId: "未設定", rate: 1500 }; 
+        let userData = { displayName: "名無し", xId: "未設定", rankIndex: 0, rankPoint: 30, sortScore: 30 }; 
         let waitingDocId = null;
         let currentRoomId = null;
         let unsubscribeRoom = null;
@@ -449,14 +496,29 @@
         let heartbeatTimer = null;
         let wakeLock = null; 
 
-        // ★★★ 別ファイルから曲リストを読み込む場合はここに import 文を書く ★★★
+        const RANKS = ["C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S", "S+"];
+
         const songDatabase = {
-            'normal': [
-                "アムピト◇リーテー","ouroboros -twin stroke of the end-","χ談","カラフル","彼は誰時の誘惑（裏）","ココドコ？多分ドッカ島！（裏）","コネクトカラーズ","GORI × GORI × SafaRI（裏）","万戈イム－一ノ十","青天の黎明","Central Dogma Pt.2","Taiko Drum Monster（表）","DEBSTEP!","Dreadnought（裏）","Don't Stop the Game","HARDCOREノ心得","幕末維新譚","†バチ!ムチ!?マッスルキングダム†","Hello, Worldooon!!（裏）","パン vs ごはん！ 大決戦！（裏）[達人]","ピッチフェイダ（裏）","for Q（裏）","プチポチ","Behemoth","まるくてはやくてすさまじいリズム","モノクロームユートピア","ラパスの虹（裏）","赤と白薔薇の魔女","あめふりのロンド（裏）","ON SAY GO SAY（裏）","カルメン組曲 一番終曲（裏）","森羅万象[開幕達人]","双竜ノ乱（裏）【双打】","デッド・オア・ダイ","23時54分、陽の旅路へのプレリュード（表）","にゃーにゃーにゃー","メタナイトの逆襲メドレー（裏）","8OROCHI（裏）","哀 want U","蒼鷺之火（裏）","或ル不和","VERTeX","美しく忙しきドナウ（裏）","ウルトラマンX（裏）","郢曲／暁闇","Agent Hustle & Dr. Hassle（表）","GERBERA","雲間を游ぐ","The Future of the 太鼓ドラム（表）","SAVAGE DELIGHT","〆ドレー2000","重金属フューギティブ","Xevel","其方、激昂","超絶技巧系少女","テトラリュトモスフォビア","天泣の律","転生〈TENSEI〉-喜与志が待つ強者-（裏）","Toon Town's Toys' Tune","ナイトメア・サバイバー（裏）","BATTLE NO.1[達人]","Honey Heartbeat ～10 Stars Mix～（裏）","Parousia","パン vs ごはん！ 大決戦！（表）[達人]","vs.VIGVANGS（表）","Mood Swing（裏）","もぺもぺ","螺旋周回軌道（裏）","LECIEL GLISSANDO","LUNATiC CiRCUiT","冷凍庫CJ ～嗚呼面太鼓ブラザーズ～","ARMAGEΔDON","Unwelcome School (MRM REMIX)（裏）","Irregular Clock（裏）","EterNal Ring","懐中庭園を持つ少女","絡繰廻廊","Caribbean Knight","GIGALODOON（裏）","鼓立あおはる学園校歌","束ね糸","チルノのパーフェクトさんすう教室➈周年バージョン（裏）","儚姫は原初に舞う（裏）","ひよこ鑑定士さん","FLOWER（裏）","BLAZING VORTEX（裏）","Player's High","ANiMA","Altale（裏）","Aleph-0","UNDEAD HEART(怒りのWarriors)","イオシス秋の爆食祭2024","怒槌","Valsqotch","OK I’m blue rat","KAGEKIYO（裏）","CUT! into the FUTURE（表）","極圏","沓の子を打つ（裏）","クラポルポルスカ","Goldfish City","Got more raves?（裏）","秋竜 ～Shiuryu～（裏）","疾風怒濤（表）","承認欲Q","Singularity Game","晨星ト鵺","SUPERNOVA（裏）","Stick Trick ShowTime!!","閃光天舞","SoulStone -闇喰イサァカス団-","SORA-VII シグナスウォール","月読命","電脳幻夜の星言詠","トイマチック☆パレード!!","Doom Noiz","Hello, Mr.JOKER","人のお金で焼肉を食したい！（裏）","FUJIN Rumble","Help me, さいたま2000!!","またさいたま2000","三瀬川乱舞（裏）","メカデス。（裏）","めためた☆ゆにば～すっ！（裏）","モノクロボイス（表）","Re：End of a Dream（裏）","竜と黒炎の姫君（裏）","練習曲Op.10-4（裏）","Rotter Tarmination（裏）","六本の薔薇と采の歌（裏）","What's in the box?","あなたとトゥラッタッタ♪（裏）","Aragami","案山子姫 -Princess Scarecrow-（裏）","Garakuta Doll Play（裏）","カラフルボイス（裏）","Calculator","気焔万丈神楽","Kill My Fortune（裏）","ゲゲゲの鬼太郎（裏）","刻竜 ～Kokuryu～（表）","神竜 ～Shinryu～（表）","Scarlet Lance","星河一天","憎悪と醜悪の花束（表）","Destr0yer（裏）","ドドドドドンだフル！（裏）","はたラク2000","Vixtory（表）","秘ナルメジェドノ悲ナル憂鬱","メタルホーク BGM1","memoria ficta","燎原ノ舞","愛と浄罪の森","アサガオ","Abyss of hell（裏）","天照","Ignis Danse","Illusion Flare","うちゅうひこうし冒険譚","ex寅 Trap!!","Evidence of evil","カラ鞠の花","ギガンティックO.T.N（裏）","きゅうくらりん（裏）","共奏鼓祭（裏）","Chronomia","弧","ゴーストマスク","ゴッドソング（裏）","God Ray","鼓舞曲「閻魔」","潮騒205号SSS線","紫煌ノ乱","蛇鉄","須佐之男","Spectral Rider","Soulway（達人）","D's Adventure Note","D絶対！SAMURAIインザレイン（裏）","てんぢく2000","弩蚊怒夏","とける（表）","Dogbite","Doppelgangers（裏）","白鳥の湖～still a duckling～（裏）","ハンロック","平等院鳳凰ドン vs 鳥獣戯カッ（裏）","ヘイラ（裏）","ヘイラ（にじさんじVer.）（裏）","ペットショップ大戦","MagiCatz","ミュージック・リボルバー（裏）","YOU're your HERO","六華の舞","wonderful ROUTINE","あの日出会えたキセキ","アンリミテッドゲームズ（表）","Gloria","濃紅","濃紅（にじさんじVer.）","ココロボ","Central Dogma Pt.1（表）","夏祭り / ジッタリン・ジン（裏）","Purple Rose Fusion","みんなのうた","MEGALOVANIA（裏）","4+1のそれぞれの未来","Lightning Boys（表）","アキバ20XX","Aloft in the wind（裏）","イガク（裏）","頂","INSPION","ウィーアー！（裏）","waitin' for u","Angel Halo","オーバード（裏）","オーブの祈り","Oshama Scramble!（裏）","GIGALODOON（表）","きたさいたま2000","キャラメル・ジャンキヰ","Surf Zapping","Silent Jealousy（裏）","セイクリッド ルイン（裏）","零の交響曲（裏）","そつおめしき2ばん","十露盤2000","Diving Drive","ダンガンノーツ（表）","天下統一録","ドドンガド～ン（裏）","No Gravity","ノるどん2000","VICTORIA","ピコピコ ルイン（裏）","VIVIVIVID","FREEDOM DiVE↓","Venomous（裏）","星屑ストラック（表）","8OROCHI（表）","YOAKE","夜桜謝肉祭（裏）","ラヴ♡スパイス♡ライクユー!!!","Libera Ray","詩謳兎揺蕩兎","Extreme End","Emma（裏）[普通]","Garakuta Doll Play（裏）【双打】","ゴーゴー・キッチン（裏）","最終鬼畜妹フランドール・S","タイコタイム（裏）","乱数調整のリバースシンデレラ（裏）","R.I.","蒼の旋律（裏）","朱の旋律","EkiBEN2000","Kamikaze Remix","Calamity Fortune（表）","キューティー☆デモニック☆魔人エモ!!","【双打】紅（裏）","さちさちにしてあげる♪（裏）","スーパーD＆D ～完全にリードしてアイマイミー～","SUPERNOVA（表）","SstTAarR*","Soulway（開幕普通）","タイコロール","タベルナ2000","儚姫は原初に舞う（表）","BATTLE NO.1[玄人]","ヒバナ（裏）","Blessed Bouquet Buskers","よーいドン！","そつおめしき","初音ミクの激唱（表）","初音ミクの激唱（裏）","パン vs ごはん！ 大決戦！（表）[普通]","パン vs ごはん！ 大決戦！（裏）[普通]","Black Rose Apostle（表）","Black Rose Apostle（裏）","マツヨイナイトバグ（裏）","X-DAY2000","KAGEKIYO（裏）【双打】","Clotho クロートー","旋風ノ舞【天】（表）","旋風ノ舞【天】（裏）","チルノのパーフェクトさんすう教室（裏）","ネクロファンタジア ～ Arr.Demetori","拝啓ドッペルゲンガー","BATTLE NO.1[普通]","mint tears"
-            ],
-            'hard': [
-                "Infinite Rebellion","彁（裏）","CRUXNAUT","The Future of the 太鼓ドラム（裏）","神竜 ～Shinryu～（裏）","憎悪と醜悪の花束（裏）","ダーク・エクス・マキナ♡","第六天魔王（表）","第六天魔王（裏）","ダンガンノーツ（裏）","Destination 2F29","ドンカマ2000","23時54分、陽の旅路へのプレリュード（裏）","Vixtory（裏）","vs.VIGVANGS（裏）","poxei♦DOON","幽玄ノ乱","!!!カオスタイム!!!","†††カオスタイム the DARK†††","Calamity Fortune（裏）","業 -善なる神とこの世の悪について-（裏）","最果の魔法使い（裏）","siren's eye","疾風怒濤（裏）","Central Dogma Pt.1（裏）","魑魅魍魎","とける（裏）","トロいか2000","ラ・モレーナ・クモナイ（裏）","アンリミテッドゲームズ（裏）","Emma（裏）[達人]","CUT! into the FUTURE（裏）","刻竜 ～Kokuryu～（裏）","!!!チルノのパーフェクトさんすうタイム!!!","まださいたま2000","4+1のそれぞれの未来（裏）[達人]","4+1のそれぞれの未来（裏）[玄人]","4+1のそれぞれの未来（裏）[普通]","オペレート・ミー（裏）","彁（表）","仮想現実のテレスコープ（裏）","Coquette","Synthesis.（裏）","スーハー2000","続・〆ドレー2000","そして勇者は眠りにつく（裏）","Taiko Drum Monster（裏）","Challengers","≠ＭＭ","Hurtling Boys","初音ミクの消失‐劇場版‐（裏）","星屑ストラック（裏）","Lightning Boys（裏）","Lδchesis（裏）","λ7708","わら得る2000","Xa（裏）","狂瀾怒濤（裏）","氷竜～Kooryu～（裏）","Genesis Ray（裏）","双竜ノ乱","たいこの2000","チャーリーダッシュ！","Nosferatu（裏）","POLARiSNAUT","モノクロボイス（裏）","UFO Swingin'"
-            ]
+            'normal': ["夏祭り", "紅", "さくらんぼ", "前前前世", "天体観測", "千本桜", "女々しくて", "シャルル"],
+            'hard': ["幽玄ノ乱", "ドンカマ2000", "第六天魔王", "カオスタイム", "Infinite Rebellion", "双竜ノ乱", "poxei♦DOON"]
+        };
+
+        // --- ウデマエ計算ロジック ---
+        const getRankName = (idx) => RANKS[idx] || "C-";
+        const getRankColorClass = (idx) => {
+            const name = getRankName(idx);
+            if(name.startsWith('S')) return 'udemae-S';
+            if(name.startsWith('A')) return 'udemae-A';
+            if(name.startsWith('B')) return 'udemae-B';
+            return 'udemae-C';
+        };
+        
+        // ランクごとの基礎点設定
+        const getBasePoint = (rankName) => {
+            if (rankName.startsWith('S')) return { win: 5, lose: 5 }; // S, S+
+            if (rankName.startsWith('A')) return { win: 12, lose: 10 };
+            if (rankName.startsWith('B')) return { win: 15, lose: 10 };
+            return { win: 20, lose: 10 }; // C帯
         };
 
         const requestWakeLock = async () => {
@@ -495,13 +557,10 @@
         if (savedMode) window.setViewMode(savedMode);
         else window.setViewMode('mobile');
 
-        // --- イベントリスナー設定 ---
         const bindBtn = (id, func) => {
             const el = document.getElementById(id);
             if(el) el.addEventListener('click', func);
         };
-
-        // ログイン系
         bindBtn('btn-login-google', () => {
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
@@ -516,14 +575,12 @@
         });
         bindBtn('btn-login-anon', () => signInAnonymously(auth).catch(e => alert(e.message)));
 
-        // メニュー・マッチング系
         bindBtn('btn-mode-normal', () => window.tryStartMatching('normal'));
         bindBtn('btn-mode-hard', () => window.tryStartMatching('hard'));
         bindBtn('btn-cancel-match', () => window.cancelMatching());
         bindBtn('btn-return-title', () => window.returnToTitle());
         bindBtn('btn-rules', () => document.getElementById('rule-modal').style.display = 'flex');
 
-        // --- ログアウト処理 ---
         window.confirmLogout = async () => {
             if (confirm("本当にログアウトしますか？")) {
                 await signOut(auth);
@@ -552,9 +609,13 @@
                             location.reload();
                             return;
                         }
-                        if(userData.rate === undefined) userData.rate = 1500;
+                        if(userData.rankIndex === undefined) {
+                            userData.rankIndex = 0;
+                            userData.rankPoint = 30;
+                            userData.sortScore = 30;
+                        }
                     } else {
-                        userData = { displayName: "名無しどん", xId: "未設定", rate: 1500, createdAt: new Date() };
+                        userData = { displayName: "名無しどん", xId: "未設定", rankIndex: 0, rankPoint: 30, sortScore: 30, createdAt: new Date() };
                         await setDoc(userRef, userData);
                     }
                     updateProfileUI();
@@ -568,7 +629,22 @@
         const updateProfileUI = () => {
             document.getElementById('display-name').innerText = userData.displayName;
             document.getElementById('display-xid').innerText = userData.xId;
-            document.getElementById('display-rate').innerText = userData.rate;
+            
+            const rankName = getRankName(userData.rankIndex);
+            const point = userData.rankPoint;
+            const el = document.getElementById('display-rank');
+            const pointEl = document.getElementById('display-point'); // 追加: 数値表示用
+            const meterBar = document.getElementById('display-meter-bar');
+            const meterText = document.getElementById('display-meter-text');
+            
+            el.innerText = rankName;
+            el.className = `profile-udemae ${getRankColorClass(userData.rankIndex)}`;
+            
+            // メーター更新
+            const percentage = Math.min(100, Math.max(0, point));
+            meterBar.style.width = `${percentage}%`;
+            meterText.innerText = `${point} / 99`;
+
             document.getElementById('edit-name').value = userData.displayName;
             document.getElementById('edit-xid').value = userData.xId;
         };
@@ -586,20 +662,28 @@
         window.openRanking = async () => {
             document.getElementById('ranking-modal').style.display = 'flex';
             const tbody = document.getElementById('ranking-list');
-            tbody.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4">読み込み中...</td></tr>';
             try {
-                const q = query(collection(db, "users"), orderBy("rate", "desc"), limit(10));
+                const q = query(collection(db, "users"), orderBy("sortScore", "desc"), limit(10));
                 const snapshot = await getDocs(q);
                 tbody.innerHTML = "";
                 let rank = 1;
                 snapshot.forEach(doc => {
                     const d = doc.data();
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td class="rank-${rank}">${rank}</td><td style="text-align:left;">${d.displayName || '名無し'}</td><td>${d.rate || 1500}</td>`;
+                    const rIdx = d.rankIndex !== undefined ? d.rankIndex : 0;
+                    const rPnt = d.rankPoint !== undefined ? d.rankPoint : 0;
+                    const rName = getRankName(rIdx);
+                    const rColor = getRankColorClass(rIdx);
+                    
+                    tr.innerHTML = `<td class="rank-${rank}">${rank}</td>
+                                    <td style="text-align:left;">${d.displayName || '名無し'}</td>
+                                    <td class="${rColor}" style="font-weight:bold;">${rName}</td>
+                                    <td>${rPnt}</td>`;
                     tbody.appendChild(tr);
                     rank++;
                 });
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="3">読み込み失敗</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4">読み込み失敗</td></tr>'; }
         };
 
         window.tryStartMatching = (mode) => {
@@ -647,21 +731,19 @@
                     const data = d.data();
                     const elapsed = data.createdAt ? (now - data.createdAt.toMillis()) : 99999;
                     if (elapsed > 60000) { deleteDoc(doc(db, "waiting_room", d.id)).catch(()=>{}); continue; }
-                    if (elapsed > 55000) { continue; } // 安全マージン
+                    if (elapsed > 55000) { continue; }
                     if(data.uid !== currentUser.uid) { opponentDoc = d; break; }
                 }
 
                 if(opponentDoc) {
                     const opp = opponentDoc.data();
                     const matchId = Math.floor(10000000 + Math.random() * 90000000).toString();
-
                     const roomRef = await addDoc(collection(db, "rooms"), {
                         mode: mode, songs: pickRandomSongs(mode), createdAt: new Date(),
                         matchId: matchId,
-                        player1: { uid: opp.uid, xId: opp.xId, displayName: opp.displayName, rate: opp.rate, result: null, lastSeen: Date.now() },
-                        player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, rate: userData.rate, result: null, lastSeen: Date.now() }
+                        player1: { uid: opp.uid, xId: opp.xId, displayName: opp.displayName, rankIndex: opp.rankIndex, rankPoint: opp.rankPoint, result: null, lastSeen: Date.now() },
+                        player2: { uid: currentUser.uid, xId: userData.xId, displayName: userData.displayName, rankIndex: userData.rankIndex, rankPoint: userData.rankPoint, result: null, lastSeen: Date.now() }
                     });
-                    
                     await deleteDoc(doc(db, "waiting_room", opponentDoc.id));
                     localStorage.setItem('current_room_id', roomRef.id);
                     requestWakeLock();
@@ -670,7 +752,7 @@
                 } else {
                     const ref = await addDoc(collection(db, "waiting_room"), {
                         uid: currentUser.uid, mode: mode, xId: userData.xId, displayName: userData.displayName, 
-                        rate: userData.rate, createdAt: new Date()
+                        rankIndex: userData.rankIndex, rankPoint: userData.rankPoint, createdAt: new Date()
                     });
                     waitingDocId = ref.id;
                     
@@ -800,7 +882,6 @@
             document.getElementById('rep-opp-name').innerText = currentMatchData.opponent.displayName;
             document.getElementById('rep-opp-xid').innerText = currentMatchData.opponent.xId;
             
-            // HOST/GUEST 表示分け
             const isHost = currentMatchData.isP1;
             const matchId = currentMatchData.matchId || "--------";
             const instructionArea = document.getElementById('instruction-area');
@@ -815,20 +896,17 @@
                         @1 対戦番号${matchId}
                     </div>
                     <a href="${url}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white; margin-top:10px;">ツイートする</a>
-                    
                     <div class="result-step-box">
                         <strong>【リザルト提出】</strong><br>
                         相手から「よろしくお願いします！」とリプが来たら、<br>
                         <span class="highlight-text">そのリプライに対して</span>1曲ずつリザルトを貼ってください。<br>
                         (計6枚のリプがぶら下がる形になります)
                     </div>
-
                     <p style="font-size:0.8rem; color:#d32f2f; margin-top:10px;">
                         ※1〜2分待っても返信が来ない場合は、<br>一番下の「退出する」ボタンを押してください。
                     </p>
-                    
                     <p style="margin-top:15px; font-weight:bold; border-bottom:2px solid #e91e63; display:inline-block;">
-                        勝敗：3曲合計の「良」の数が多い方が勝ち
+                        勝敗：3曲合計の「良」の数が多い方が勝ち <span style="font-size:0.85rem; font-weight:normal;">(オプション自由)</span>
                     </p>
                 `;
             } else {
@@ -842,28 +920,24 @@
                     <div style="background:white; padding:5px; border-radius:5px; margin:5px 0; font-weight:bold; color:#333;">
                         対戦番号：<span style="font-size:1.3rem; color:#e91e63;">${matchId}</span>
                     </div>
-
                     <p>相手のプロフィールに飛び、上記番号のツイートを探してください。</p>
                     <p style="color:#d32f2f; font-weight:bold; background:#fff; padding:5px; border-radius:4px; margin:10px 0;">
                         ⚠️必ず「返信」欄を見てください！<br>
                         <span style="font-size:0.8rem; font-weight:normal;">(@1 ツイートは通常のポスト欄には表示されません)</span>
                     </p>
                     <a href="${profileUrl}" target="_blank" class="btn btn-x-share" style="display:block; text-decoration:none; text-align:center; color:white;">相手のXプロフィールへ</a>
-                    
                     <div style="margin-top:15px; padding:10px; background:#fff3e0; border-radius:8px; font-size:0.85rem;">
                         <strong>どうしても見つからない場合</strong><br>
                         以下の文言で検索してみてください。<br>
                         <div style="font-weight:bold; margin:5px 0; user-select:all; -webkit-user-select:all;">${searchText}</div>
                         <a href="${searchUrl}" target="_blank" style="color:#e65100; text-decoration:underline;">ここを押して検索する</a>
                     </div>
-
                     <div class="result-step-box">
                         <strong>【リザルト提出】</strong><br>
                         相手のツイートに「よろしくお願いします！」とリプした後、<br>
                         <span class="highlight-text">その自分のリプライに対して</span>1曲ずつリザルトを貼ってください。<br>
                         (計6枚のリプがぶら下がる形になります)
                     </div>
-
                     <div style="margin-top:15px; font-size:0.85rem; color:#555; line-height:1.4;">
                         相手は2分以内にツイートするルールです。<br>
                         まずは<strong>1分ほど待ってみてください！</strong>
@@ -871,9 +945,8 @@
                     <p style="font-size:0.8rem; color:#d32f2f; margin-top:5px;">
                         ※もし2分経ってもツイートが見つからない場合は、<br>一番下の「退出する」ボタンを押してください。
                     </p>
-
                     <p style="margin-top:15px; font-weight:bold; border-bottom:2px solid #2196f3; display:inline-block;">
-                        勝敗：3曲合計の「良」の数が多い方が勝ち
+                        勝敗：3曲合計の「良」の数が多い方が勝ち <span style="font-size:0.85rem; font-weight:normal;">(オプション自由)</span>
                     </p>
                 `;
             }
@@ -892,12 +965,10 @@
             const now = Date.now();
             const startTime = currentMatchData.createdAt ? currentMatchData.createdAt.toMillis() : now;
             const elapsed = now - startTime;
-
             if (elapsed < 300000) { 
                 alert("異常を検知しました。\n3曲とも演奏してから結果申告してください");
                 return;
             }
-
             selectedResult = res;
             const map = { 'WIN':'勝ち', 'LOSE':'負け', 'DRAW':'引分' };
             document.getElementById('modal-selection').innerText = map[res];
@@ -914,6 +985,7 @@
             } catch(e) { console.error(e); switchScreen('report-screen'); }
         };
 
+        // ★★★ ウデマエ計算ロジック実装 ★★★
         const checkAndFinalize = async (p1Res, p2Res, amIP1) => {
             const myRes = amIP1 ? p1Res : p2Res;
             const oppRes = amIP1 ? p2Res : p1Res;
@@ -929,26 +1001,65 @@
                 if(heartbeatTimer) clearInterval(heartbeatTimer);
                 if(wakeLock) wakeLock.release().catch(()=>{});
                 
-                const K = 32;
-                const myRate = Number(currentMatchData.me.rate) || 1500;
-                const oppRate = Number(currentMatchData.opponent.rate) || 1500;
-                const expected = 1 / (1 + Math.pow(10, (oppRate - myRate) / 400));
+                // 現在のランクとポイント取得
+                let currentIdx = userData.rankIndex !== undefined ? userData.rankIndex : 0;
+                let currentPt = userData.rankPoint !== undefined ? userData.rankPoint : 30;
+                const currentRankName = getRankName(currentIdx);
+
+                let gain = 0;
+                let isRankUp = false;
+                let isRankDown = false;
                 
-                let actualScore = 0;
-                if (myRes === 'WIN') actualScore = 1;
-                else if (myRes === 'DRAW') actualScore = 0.5;
+                // 基礎点取得
+                const base = getBasePoint(currentRankName);
+                
+                // ランダム変動 (-1, 0, +1 の揺らぎ)
+                const fluctuation = Math.floor(Math.random() * 3) - 1;
 
-                let diff = Math.round(K * (actualScore - expected));
-                if (diff === 0 && myRes === 'WIN') diff = 1;
-                if (diff === 0 && myRes === 'LOSE') diff = -1;
+                if (myRes === 'WIN') {
+                    gain = base.win + fluctuation;
+                    currentPt += gain;
+                    // 昇格判定
+                    if (currentPt > 99) {
+                        if (currentIdx < RANKS.length - 1) {
+                            currentIdx++; 
+                            currentPt = 30; 
+                            isRankUp = true;
+                        } else {
+                            currentPt = 99; // カンスト
+                        }
+                    }
+                } else if (myRes === 'LOSE') {
+                    gain = -(base.lose + fluctuation); // 負けはマイナス
+                    currentPt += gain; // gainがマイナスなので足す
+                    // 降格判定
+                    if (currentPt < 0) {
+                        if (currentIdx > 0) {
+                            currentIdx--; 
+                            currentPt = 70; 
+                            isRankDown = true;
+                        } else {
+                            currentPt = 0; // C-下限
+                        }
+                    }
+                } else {
+                    gain = 0;
+                }
 
-                const newRate = myRate + diff;
+                const sortScore = (currentIdx * 100) + currentPt;
 
                 try {
-                    await setDoc(doc(db, "users", currentUser.uid), { rate: newRate }, { merge: true });
-                    userData.rate = newRate; 
+                    await setDoc(doc(db, "users", currentUser.uid), { 
+                        rankIndex: currentIdx,
+                        rankPoint: currentPt,
+                        sortScore: sortScore
+                    }, { merge: true });
+                    userData.rankIndex = currentIdx;
+                    userData.rankPoint = currentPt;
                 } catch (e) {}
-                showFinalResult(myRes, diff, newRate);
+
+                showFinalResult(myRes, gain, isRankUp, isRankDown);
+
             } else {
                 isFinalizing = false;
                 document.getElementById('error-modal').style.display = 'flex';
@@ -998,47 +1109,53 @@
             setTimeout(() => { canvas.style.display = 'none'; }, 5000); 
         };
 
-        const showFinalResult = (result, diff, currentRate) => {
+        const showFinalResult = (result, gain, isUp, isDown) => {
             switchScreen('final-result-screen');
             const title = document.getElementById('final-title');
             const msg = document.getElementById('final-message');
-            const diffEl = document.getElementById('anim-rate-diff');
+            const diffEl = document.getElementById('anim-point-diff');
+            const rankMsg = document.getElementById('rank-change-msg');
             
             diffEl.className = "rate-diff"; 
+            rankMsg.innerHTML = ""; 
+
             if(result === 'WIN') {
                 title.innerText = "WIN!"; title.className = "result-text-win";
                 msg.innerText = "おめでとうございます！";
-                diffEl.innerText = "+" + diff; diffEl.classList.add("plus");
+                diffEl.innerText = "+" + gain; diffEl.classList.add("plus");
+                if(isUp) {
+                    rankMsg.innerHTML = "ランクアップ！";
+                    rankMsg.className = "rank-change-text rank-up";
+                }
                 triggerConfetti(); 
             } else if(result === 'LOSE') {
                 title.innerText = "LOSE..."; title.className = "result-text-lose";
                 msg.innerText = "ドンマイ！次こそは！";
-                diffEl.innerText = diff; diffEl.classList.add("minus");
+                diffEl.innerText = gain; diffEl.classList.add("minus");
+                if(isDown) {
+                    rankMsg.innerHTML = "ランクダウン...";
+                    rankMsg.className = "rank-change-text rank-down";
+                }
             } else {
                 title.innerText = "DRAW"; title.className = ""; title.style.color = "#9c27b0";
                 msg.innerText = "熱い戦いでした！";
-                diffEl.innerText = (diff >= 0 ? "+" : "") + diff;
-                diffEl.style.background = "#9c27b0";
+                diffEl.innerText = "±0"; diffEl.style.background = "#9c27b0";
             }
 
-            const rateValEl = document.getElementById('anim-rate-val');
-            const startRate = currentRate - diff;
-            const duration = 1500;
-            const startTime = performance.now();
+            const rateValEl = document.getElementById('anim-rank-val');
+            const rateSubEl = document.getElementById('anim-point-val');
+            const meterBar = document.getElementById('anim-meter-bar'); // 結果画面用メーター
 
-            function updateRate(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-                const val = Math.floor(startRate + diff * ease);
-                rateValEl.innerText = val;
-                if(progress < 1) requestAnimationFrame(updateRate);
-                else {
-                    rateValEl.innerText = currentRate;
-                    diffEl.classList.add('show'); 
-                }
-            }
-            requestAnimationFrame(updateRate);
+            rateValEl.innerText = getRankName(userData.rankIndex);
+            rateValEl.className = `rate-value ${getRankColorClass(userData.rankIndex)}`;
+            rateSubEl.innerText = `${userData.rankPoint} / 99`;
+            
+            // メーターアニメーション
+            setTimeout(() => {
+                const percentage = Math.min(100, Math.max(0, userData.rankPoint));
+                meterBar.style.width = `${percentage}%`;
+                diffEl.classList.add('show'); 
+            }, 500);
         };
 
         window.tryExitRoom = () => {
